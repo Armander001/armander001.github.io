@@ -1,0 +1,26 @@
+---
+title: 'Why scientific data deserves better interfaces'
+dek: 'A dataset that only its author can navigate is a failure of design, not just a limitation of the audience.'
+date: 2026-03-14
+tags: ['philosophy', 'data visualization', 'scientific communication']
+---
+
+Most scientific data is published the way it was analyzed: as a static figure, dropped into a paper, frozen at the exact zoom level and color scale the author happened to be looking at when they made the decision to stop iterating. The figure is correct. It is also, for almost everyone who isn't the author, close to unreadable — not because the reader is untrained, but because a static image can only ever answer the one question it was built to answer.
+
+That's the gap this practice tries to work in. Not "how do we make the chart prettier," but "how do we make the underlying data navigable by someone who wasn't in the room when it was collected."
+
+## An interface is an argument
+
+A habitat classification map with a legend and nothing else is making an implicit argument: *trust this*. A habitat map with an error matrix, a way to toggle between the raw imagery and the classification, and a slider to compare two time periods is making a different, better argument: *here is what we know, here is how confident we are, and here is how to check it yourself*. The second version takes more work to build. It is also the only one that holds up to scrutiny from someone who wasn't already inclined to agree.
+
+This is why interactivity, in this practice, isn't decoration. A before/after slider comparing satellite imagery to a classified map isn't there to look modern — it's there because the honest answer to "how good is this classification" is a comparison, not a caption. A digital twin you can rotate isn't a gimmick version of a photo — it's the only format that lets someone independently check whether the structural complexity claim in the text is actually true. Every interactive element on a page like this one should be answerable to the question: what does this let a skeptical reader verify that a static figure would have asked them to just believe?
+
+## Exploration is not the enemy of rigor
+
+There's a reasonable worry that giving people a data explorer instead of a fixed conclusion lets them find whatever story they want in the noise. The corrective isn't to take the controls away — it's to be honest about uncertainty *inside* the interface itself, the same way a good figure caption would be honest about it in a paper. An accuracy assessment rendered as a real, per-class error matrix — not a single "94% accurate" headline number — does more to prevent motivated misreading than hiding the underlying data ever could. Good interface design and rigorous science are not in tension; a badly designed interface is just a rigorous analysis with a translation problem.
+
+## What this means in practice
+
+Concretely, it means a few defaults that show up across this site: static comparisons become sliders wherever there's a real before/after to show. 3D reconstructions get a viewer, not just a hero screenshot. Every classification or model that claims an accuracy number gets a real way to interrogate that number, not just state it. And nothing gets an interactive treatment it doesn't earn — motion and manipulation are a cost paid in complexity and load time, and they only make sense when they let someone check something a static page couldn't have shown them.
+
+The underlying belief is simple: the data was hard-won. The least it deserves is an interface that doesn't waste that effort by making it illegible to everyone except the person who made it.

@@ -1,0 +1,131 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Button from '@/components/Button.astro';
+import Tag from '@/components/Tag.astro';
+import Timeline from '@/components/interactive/Timeline.astro';
+import { site } from '@/config/site';
+import { experience, education, skillGroups, awards, talks, teaching } from '@/data/cv';
+
+const experienceItems = experience.map((e) => ({
+  period: e.period,
+  title: e.title,
+  org: e.org,
+  summary: e.summary,
+  tags: e.tags,
+}));
+
+const title = 'CV';
+const description = `${site.name}'s CV — experience, education, skills, awards, talks, and teaching.`;
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>CV</p>
+        <h1 data-reveal>{site.name}</h1>
+        <p class="mt-2 text-ink-mute" data-reveal>{site.role}</p>
+        <a href={`mailto:${site.email}`} class="mt-1 inline-block font-mono text-sm text-cyan hover:underline">
+          {site.email}
+        </a>
+      </div>
+      <div class="no-print" data-reveal>
+        <Button href="/cv.pdf" variant="outline">Download PDF</Button>
+        <p class="mt-2 font-mono text-xs text-ink-mute">[Add cv.pdf to /public]</p>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Experience" title="Experience" />
+    <Timeline items={experienceItems} class="max-w-3xl" />
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Education" title="Education" />
+    <ul class="max-w-3xl space-y-6">
+      {
+        education.map((ed) => (
+          <li class="border-l-2 border-line pl-5" data-reveal>
+            <p class="font-mono text-xs text-ink-mute">{ed.period}</p>
+            <h3 class="mt-1 text-lg">{ed.degree}</h3>
+            <p class="text-ink-mute">{ed.institution}</p>
+            {ed.detail && <p class="mt-1 text-sm text-ink-mute">{ed.detail}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Skills" title="Skills" />
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        skillGroups.map((group) => (
+          <div data-reveal>
+            <h3 class="mb-3 text-sm font-medium text-ink-mute uppercase tracking-wide">
+              {group.group}
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <Tag>{skill}</Tag>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Awards" title="Awards & grants" />
+    <ul class="max-w-3xl space-y-4">
+      {
+        awards.map((award) => (
+          <li class="border-l-2 border-line pl-5" data-reveal>
+            <p class="font-mono text-xs text-ink-mute">{award.year}</p>
+            <p class="mt-1">
+              {award.title} <span class="text-ink-mute">— {award.org}</span>
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Talks" title="Talks" />
+    <ul class="max-w-3xl space-y-4">
+      {
+        talks.map((talk) => (
+          <li class="border-l-2 border-line pl-5" data-reveal>
+            <p class="font-mono text-xs text-ink-mute">{talk.year}</p>
+            <p class="mt-1">
+              {talk.title} <span class="text-ink-mute">— {talk.venue}</span>
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Teaching" title="Teaching" />
+    <ul class="max-w-3xl space-y-4">
+      {
+        teaching.map((t) => (
+          <li class="border-l-2 border-line pl-5" data-reveal>
+            <p class="font-mono text-xs text-ink-mute">{t.period}</p>
+            <h3 class="mt-1 text-lg">{t.title}</h3>
+            <p class="text-ink-mute">
+              {t.org}
+              {t.detail && ` — ${t.detail}`}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+</BaseLayout>

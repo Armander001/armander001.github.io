@@ -1,0 +1,30 @@
+---
+import ProseLayout from '@/layouts/ProseLayout.astro';
+import Tag from '@/components/Tag.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.map((note) => ({
+    params: { slug: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+const { data } = note;
+---
+
+<ProseLayout
+  title={data.title}
+  description={data.dek}
+  kicker="Notes"
+  dek={data.dek}
+  date={data.date}
+>
+  <Content />
+  <div class="mt-10 flex flex-wrap gap-2 not-prose">
+    {data.tags.map((tag: string) => <Tag>{tag}</Tag>)}
+  </div>
+</ProseLayout>

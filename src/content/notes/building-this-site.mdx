@@ -1,0 +1,26 @@
+---
+title: 'Building this site'
+dek: 'A short colophon on the stack, the design system, and the performance budget behind this portfolio.'
+date: 2026-07-03
+tags: ['colophon', 'web development', 'astro']
+---
+
+This site is built with [Astro](https://astro.build), and the reason is almost entirely the thing Astro calls islands: every page ships as plain HTML and CSS by default, and JavaScript only exists where a component genuinely needs it — a comparison slider, a lightbox, a canvas animation. There is no framework runtime shipping to every page just so three components on one page can be interactive. For a site whose whole pitch is "data made explorable without cost," shipping a heavy JavaScript bundle to every visitor would have undercut the argument before it started.
+
+## The design system
+
+Visually, the site runs on a small set of theme-aware CSS custom properties rather than a component library — an "Abyssal Light" palette meant to read like a satellite view of a reef shelf at depth: deep navy and near-black in dark mode (the default), warm sand tones in light mode, with cyan, teal, and coral reserved as accents rather than used everywhere. Typography pairs [Fraunces](https://github.com/undercasetype/Fraunces) for display type — an editorial, slightly organic serif — with Inter for body text and JetBrains Mono for the small data-adjacent labels (nav indices, stat figures, captions) that recur throughout the site.
+
+The recurring visual motif — concentric, hand-drawn-feeling contour lines — is meant to evoke bathymetric charts: the same kind of map that turns depth into a drawing. It shows up in the footer, section dividers, the favicon, and the 404 page, always as one shared inline SVG component rather than copy-pasted markup.
+
+## The interactive components
+
+Every interactive piece — the before/after comparison slider, the lightbox gallery, the count-up stat band, the drifting particle field behind the hero — is hand-built in vanilla TypeScript with zero runtime dependencies, specifically so the JavaScript budget for the whole site stays small enough that adding a component never means adding a framework. Each one is built keyboard-first (the comparison slider is a real ARIA `slider`, not a `div` with a drag handler bolted on) and respects `prefers-reduced-motion` — animations either don't run or complete instantly, and the content underneath is always legible without JavaScript at all.
+
+The one library-shaped exception, `PlaceholderArt`, isn't a UI library — it's a small deterministic generator that produces the abstract, ocean-and-satellite-inspired artwork standing in for real project photography until it's replaced. Same variant and seed always produce the same image, so placeholder content stays stable across builds instead of visibly shifting every time the page reloads.
+
+## Performance and deployment
+
+The whole site targets a 95+ Lighthouse performance score and 100 on accessibility, best practices, and SEO — treated as a hard budget, not an aspiration: total shipped JavaScript stays under roughly 60KB, fonts are self-hosted and subset, and every image on the page (for now, entirely generative SVG placeholder art) is inline and dependency-free. Content lives as typed Markdown/MDX collections and YAML data files, so adding a project or a note is a content change, not a code change. Deployment runs on a GitHub Actions workflow that builds the site with Astro and publishes straight to GitHub Pages on every push to `main`.
+
+None of this is exotic. It's mostly restraint: pick a framework that defaults to shipping nothing, add interactivity only where it earns its cost, and hold the performance budget as a real constraint rather than a number checked once after launch.

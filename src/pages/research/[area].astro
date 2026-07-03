@@ -1,0 +1,99 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Tag from '@/components/Tag.astro';
+import ProjectCard from '@/components/interactive/ProjectCard.astro';
+import CompareSlider from '@/components/interactive/CompareSlider.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import { getCollection } from 'astro:content';
+import { researchAreas } from '@/data/research';
+
+export async function getStaticPaths() {
+  return researchAreas.map((area) => ({
+    params: { area: area.slug },
+    props: { area },
+  }));
+}
+
+const { area } = Astro.props;
+
+const relatedProjects = (await getCollection('projects'))
+  .filter((p) => p.data.area === area.slug)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const title = area.title;
+const description = area.blurb;
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+      Research
+    </p>
+    <h1 class="max-w-2xl" data-reveal>{area.title}</h1>
+    <p class="mt-6 max-w-2xl text-lg text-ink-mute" data-reveal>{area.hero}</p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Questions" title="Questions I'm exploring" />
+    <ul class="max-w-2xl space-y-4">
+      {
+        area.questions.map((q) => (
+          <li class="border-l-2 border-line pl-4 text-ink-mute" data-reveal>
+            {q}
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Methods" title="Methods & tools" />
+    <div class="flex flex-wrap gap-2" data-reveal>
+      {area.methods.map((m) => <Tag>{m}</Tag>)}
+    </div>
+  </Section>
+
+  {
+    area.slug === 'coral-reefs' && (
+      <Section class="border-t border-line">
+        <SectionHeading
+          kicker="Illustrative demo"
+          title="Seeing habitat change"
+          dek="A demo of the before/after comparison pattern used across this site — swap in a real image pair from your own classification runs."
+        />
+        <CompareSlider
+          beforeLabel="Sentinel-2 RGB — [2016]"
+          afterLabel="Habitat classes — [2024]"
+          alt="Illustrative comparison of true-color satellite imagery and a classified habitat map"
+          class="mx-auto max-w-3xl"
+        >
+          <PlaceholderArt slot="before" variant="field" seed={11} />
+          <PlaceholderArt slot="after" variant="satellite" seed={11} />
+        </CompareSlider>
+      </Section>
+    )
+  }
+
+  {
+    relatedProjects.length > 0 && (
+      <Section class="border-t border-line">
+        <SectionHeading kicker="Related work" title="Projects in this area" />
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {relatedProjects.map((p, i) => (
+            <ProjectCard
+              href={`/projects/${p.id}`}
+              index={String(i + 1).padStart(2, '0')}
+              title={p.data.title}
+              hook={p.data.hook}
+              tags={p.data.tags}
+              art={p.data.art}
+              seed={p.data.seed}
+            />
+          ))}
+        </div>
+      </Section>
+    )
+  }
+</BaseLayout>

@@ -1,0 +1,105 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import ProjectCard from '@/components/interactive/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects')).sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+  return a.data.order - b.data.order;
+});
+
+const allTags = [...new Set(projects.flatMap((p) => p.data.tags))].sort();
+
+const title = 'Work';
+const description = 'Selected projects spanning coral reef monitoring, digital twins, remote sensing, and data storytelling.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>Work</p>
+    <h1 class="max-w-2xl" data-reveal>Selected projects</h1>
+    <p class="mt-4 max-w-xl text-lg text-ink-mute" data-reveal>
+      Reef digital twins, satellite habitat maps, story maps, and the field photography and data
+      art that runs alongside the research.
+    </p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <div class="mb-8 flex flex-wrap gap-2" id="tag-filter" data-reveal>
+      <button
+        type="button"
+        class="tag-filter-btn"
+        data-tag="all"
+        aria-pressed="true"
+      >
+        All
+      </button>
+      {
+        allTags.map((tag) => (
+          <button type="button" class="tag-filter-btn" data-tag={tag} aria-pressed="false">
+            {tag}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="project-grid">
+      {
+        projects.map((p, i) => (
+          <div class="project-cell" data-tags={p.data.tags.join('|')}>
+            <ProjectCard
+              href={`/projects/${p.id}`}
+              index={String(i + 1).padStart(2, '0')}
+              title={p.data.title}
+              hook={p.data.hook}
+              tags={p.data.tags}
+              art={p.data.art}
+              seed={p.data.seed}
+            />
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <style>
+    .tag-filter-btn {
+      border-radius: 9999px;
+      border: 1px solid var(--t-line);
+      background: var(--t-surface);
+      color: var(--t-ink-mute);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.375rem 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out-soft);
+    }
+    .tag-filter-btn[aria-pressed='true'] {
+      border-color: var(--t-cyan);
+      color: var(--t-cyan);
+      background: color-mix(in srgb, var(--t-cyan) 10%, transparent);
+    }
+    .tag-filter-btn:hover {
+      border-color: var(--t-cyan);
+    }
+  </style>
+
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-filter-btn');
+    const cells = document.querySelectorAll<HTMLElement>('.project-cell');
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag!;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+
+        cells.forEach((cell) => {
+          const tags = cell.dataset.tags?.split('|') ?? [];
+          const show = tag === 'all' || tags.includes(tag);
+          cell.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,51 @@
+---
+title: 'A reef you can revisit'
+hook: 'Photogrammetric surveys turned into a centimeter-accurate, browser-explorable 3D reef model.'
+summary: 'A repeatable pipeline from underwater survey photography to a measurable WebGL digital twin, built so that change between survey seasons can be seen and quantified.'
+year: '[Year]'
+role: '[Role — e.g. research lead]'
+methods:
+  - structure-from-motion photogrammetry
+  - dense point-cloud processing
+  - mesh decimation & LOD
+  - epoch-to-epoch change detection
+tools:
+  - Agisoft Metashape
+  - CloudCompare
+  - Blender
+  - Three.js
+  - Python
+tags:
+  - digital twin
+  - photogrammetry
+  - WebGL
+art: twin
+seed: 4
+featured: true
+sample: true
+order: 1
+area: digital-twins
+---
+
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+
+## The question
+
+Field notebooks and photo archives tell you that a reef changed. They rarely tell you *by how much*, or *exactly where*. The question behind this project was simple to state and hard to deliver: can a routine survey dive produce a 3D model precise enough that two visits, a year apart, can be differenced like two versions of a document?
+
+## Approach
+
+The survey design comes first, because photogrammetry forgives almost nothing downstream. A fixed plot at [Site name] is swum in a lawnmower pattern with generous forward and side overlap, at a constant altitude above the reef, with permanent markers at the corners so every epoch reconstructs in the same coordinate frame. Scale bars laid across the plot anchor the model to real-world units.
+
+From there the pipeline is deliberately boring: image alignment and dense reconstruction in Metashape, cleaning and registration checks in CloudCompare, then a Python step that reports reconstruction error against the scale bars before anything else is allowed to happen. If the error budget fails, the epoch is re-flown — a bad model quietly poisons every comparison built on it.
+
+The interesting work is delivery. A dense reef mesh is far too heavy for a browser, so the model is decimated into progressive levels of detail and streamed into a Three.js viewer: the full plot loads coarse in a second or two, and detail refines where the camera looks. Annotations — colony IDs, transect lines, change hotspots — live as a lightweight overlay, not baked into the geometry.
+
+<figure>
+  <PlaceholderArt variant="twin" seed={14} />
+  <figcaption>Illustrative placeholder — replace with a screenshot of the model viewer or an orthomosaic of the plot.</figcaption>
+</figure>
+
+## Outcome
+
+The result is a reef plot that can be *revisited* rather than remembered: rotated, measured, and compared across epochs by anyone with a link. Differencing two survey seasons highlights growth and loss as signed surface change, turning "the reef looks worse this year" into a number with a location attached. The pipeline is documented end-to-end so a new site can be added without re-deriving any decisions.

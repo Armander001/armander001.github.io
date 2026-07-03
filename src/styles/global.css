@@ -288,3 +288,19 @@ html.js [data-reveal].revealed {
   border-radius: 0.75rem;
   border: 1px solid var(--t-line);
 }
+
+/* ------------------------------------------------------------------ *
+ * Print — used by /cv so a printed or "Save as PDF" resume is clean.
+ * ------------------------------------------------------------------ */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

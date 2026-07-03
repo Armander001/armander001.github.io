@@ -1,0 +1,48 @@
+---
+title: 'A reef told as a route, not a report'
+hook: 'A scrollytelling story map that walks readers across a reef shelf, from shoreline to fore-reef, in the order a diver actually experiences it.'
+summary: 'An interactive story map pairing a scroll-driven narrative with a live map, so readers explore reef zonation spatially instead of reading about it in the abstract.'
+year: '[Year]'
+role: '[Role — e.g. narrative designer & developer]'
+methods:
+  - scrollytelling / chaptered narrative
+  - cartographic generalization
+  - habitat zonation mapping
+  - narrative UX design
+tools:
+  - MapLibre GL JS
+  - Mapbox Studio
+  - Svelte
+  - QGIS
+tags:
+  - story map
+  - interactive media
+  - cartography
+art: story
+seed: 9
+featured: true
+sample: true
+order: 3
+area: coral-reefs
+---
+
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+
+## The question
+
+A habitat map answers "what is where." It rarely answers the question a first-time visitor actually has: what does it feel like to move across this reef, and why does the biology change every few meters? Static maps and journal figures are built for people who already know how to read them. This project asked whether a map could teach its own vocabulary as you scrolled through it.
+
+## Approach
+
+The structure borrows from documentary film more than from GIS: a fixed map stays pinned on one side of the screen while a short narrative scrolls past on the other, and each paragraph triggers a camera move, a layer toggle, or a highlight on the map — the reader never touches a zoom control, but the map is always doing something in response to what they're reading. The route follows a real cross-shelf transect, so the "chapters" are also true geography: shoreline mangrove fringe, seagrass flat, back-reef rubble, coral-dominated fore-reef, shelf edge.
+
+Getting the map itself simple enough to read at every step took more editing than the narrative did. Habitat polygons pulled from field survey data were generalized and re-symbolized specifically for this story — full classification detail would be noise at a zoomed-out establishing shot and clutter at a zoomed-in reef close-up, so the map carries two or three simplified symbol sets and swaps between them as the reader moves through the chapters.
+
+<figure>
+  <PlaceholderArt variant="story" seed={9} />
+  <figcaption>Illustrative placeholder — replace with a captured frame of the live story map.</figcaption>
+</figure>
+
+## Outcome
+
+The finished piece reads in about six minutes and has been used as an onsite introduction for [audience — e.g. visiting students / community groups] before they see the reef itself. The chaptered scrollytelling pattern is now the template for other site-specific stories — the map and camera logic are reusable; only the transect data and narrative text change per site.

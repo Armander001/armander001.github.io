@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import Lightbox from '@/components/interactive/Lightbox.astro';
+import { getCollection } from 'astro:content';
+
+const photos = await getCollection('photos');
+const items = photos.map((p) => ({
+  id: p.data.id,
+  title: p.data.title,
+  caption: p.data.caption,
+  alt: p.data.alt,
+  art: p.data.art,
+}));
+
+const title = 'Photography';
+const description = 'Field photography from reef surveys — documenting the practice of research alongside the reef itself.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+      Photography
+    </p>
+    <h1 class="max-w-2xl" data-reveal>Field photography</h1>
+    <p class="mt-4 max-w-xl text-lg text-ink-mute" data-reveal>
+      Photography has always run alongside the research, not separate from it — the survey work,
+      the reef itself, and the long hours in between that never make it into a dataset. Replace
+      the placeholder artwork below with your own images.
+    </p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <Lightbox items={items} columns={3} />
+  </Section>
+</BaseLayout>

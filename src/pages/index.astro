@@ -1,25 +1,151 @@
 ---
-/**
- * TEMPORARY home page — proves layout/nav/footer/theme wiring.
- * The real home page (hero, StatBand, featured projects, …) arrives in WP-C.
- */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Button from '@/components/Button.astro';
+import Card from '@/components/Card.astro';
+import OceanField from '@/components/interactive/OceanField.astro';
+import ProjectCard from '@/components/interactive/ProjectCard.astro';
+import { getCollection } from 'astro:content';
 import { site } from '@/config/site';
+import { researchAreas } from '@/data/research';
+
+const allProjects = await getCollection('projects');
+const featured = allProjects
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const notes = (await getCollection('notes'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
+
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: site.url,
+  sameAs: site.social.filter((s) => !s.placeholder).map((s) => s.href),
+};
 ---
 
-<BaseLayout
-  title={`${site.name} — scientific visualization & remote sensing`}
-  description={site.tagline}
-  isHome
->
+<BaseLayout title={site.name} description={site.tagline} isHome>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(personJsonLd)} />
+
+  <!-- Hero -->
+  <div class="relative overflow-hidden border-b border-line">
+    <OceanField />
+    <Section class="relative flex min-h-[85vh] flex-col justify-center pt-28 pb-20 md:pt-32">
+      <p class="mb-5 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+        Scientific visualization · Remote sensing · Digital twins
+      </p>
+      <h1 class="max-w-3xl" data-reveal>
+        I turn scientific data into experiences people can explore.
+      </h1>
+      <p class="mt-6 max-w-xl text-lg text-ink-mute" data-reveal>
+        {site.role}.
+      </p>
+      <div class="mt-10 flex flex-wrap gap-3" data-reveal>
+        <Button href="/projects" variant="solid">View work</Button>
+        <Button href="/about" variant="outline">About me</Button>
+      </div>
+    </Section>
+  </div>
+
+  <!-- Intro -->
   <Section>
-    <p class="mb-4 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
-      Scientific visualization · Remote sensing · Digital twins
+    <div class="max-w-2xl">
+      <p class="text-xl text-ink md:text-2xl" data-reveal>
+        I design interactive experiences around scientific data — reef digital twins built from
+        photogrammetry, satellite habitat maps you can compare across years, story maps that teach
+        their own vocabulary as you scroll. The goal is always the same: make the data legible to
+        someone who wasn't in the field or the lab when it was collected.
+      </p>
+    </div>
+  </Section>
+
+  <!-- Featured work -->
+  <Section id="work" class="border-t border-line">
+    <SectionHeading
+      kicker="01 / Selected work"
+      title="Featured projects"
+      dek="A sample of the work spanning coral reef monitoring, digital twins, and remote sensing."
+    />
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
+      {
+        featured.map((p, i) => (
+          <ProjectCard
+            href={`/projects/${p.id}`}
+            index={String(i + 1).padStart(2, '0')}
+            title={p.data.title}
+            hook={p.data.hook}
+            tags={p.data.tags}
+            art={p.data.art}
+            seed={p.data.seed}
+          />
+        ))
+      }
+    </div>
+    <div class="mt-10">
+      <Button href="/projects" variant="ghost">See all projects →</Button>
+    </div>
+  </Section>
+
+  <!-- Research areas -->
+  <Section id="research" class="border-t border-line">
+    <SectionHeading
+      kicker="02 / Research"
+      title="Areas I work in"
+      dek="Three threads that run through everything on this site."
+    />
+    <div class="grid gap-6 md:grid-cols-3">
+      {
+        researchAreas.map((area) => (
+          <Card hover class="flex h-full flex-col" data-reveal>
+            <a href={`/research/${area.slug}`} class="flex h-full flex-col no-underline">
+              <h3 class="mb-3 text-xl">{area.title}</h3>
+              <p class="flex-1 text-sm text-ink-mute">{area.blurb}</p>
+              <span class="mt-4 font-mono text-xs tracking-wide text-cyan">Explore →</span>
+            </a>
+          </Card>
+        ))
+      }
+    </div>
+  </Section>
+
+  <!-- Latest notes -->
+  <Section id="notes" class="border-t border-line">
+    <SectionHeading kicker="03 / Notes" title="From the notebook" />
+    <div class="grid gap-6 md:grid-cols-2">
+      {
+        notes.map((note) => (
+          <Card hover data-reveal>
+            <a href={`/notes/${note.id}`} class="no-underline">
+              <p class="mb-2 font-mono text-xs text-ink-mute">
+                {note.data.date.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+              <h3 class="mb-2 text-lg">{note.data.title}</h3>
+              <p class="text-sm text-ink-mute">{note.data.dek}</p>
+            </a>
+          </Card>
+        ))
+      }
+    </div>
+  </Section>
+
+  <!-- Contact CTA -->
+  <Section class="border-t border-line text-center">
+    <h2 class="mx-auto max-w-xl" data-reveal>Working on something at this intersection?</h2>
+    <p class="mx-auto mt-4 max-w-md text-ink-mute" data-reveal>
+      I'm always glad to talk about reef monitoring, digital twins, or scientific data
+      visualization.
     </p>
-    <h1 class="max-w-3xl" data-reveal>{site.tagline}</h1>
-    <p class="mt-8 font-mono text-sm text-ink-mute" data-reveal>
-      Home page arrives in WP-C.
-    </p>
+    <div class="mt-8" data-reveal>
+      <Button href="/contact" variant="solid">Get in touch</Button>
+    </div>
   </Section>
 </BaseLayout>

@@ -1,0 +1,90 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Button from '@/components/Button.astro';
+import Tag from '@/components/Tag.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import { site } from '@/config/site';
+import { skillGroups } from '@/data/cv';
+
+const title = 'About';
+const description = `About ${site.name} — researcher and creative technologist working across scientific visualization, remote sensing, and coral reef research.`;
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <div class="grid gap-12 md:grid-cols-[minmax(0,1fr)_18rem] md:gap-16">
+      <div>
+        <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+          About
+        </p>
+        <h1 class="max-w-xl" data-reveal>{site.name}</h1>
+        <p class="mt-4 max-w-lg text-lg text-ink-mute" data-reveal>
+          {site.role}.
+        </p>
+      </div>
+      <figure class="overflow-hidden rounded-2xl border border-line bg-surface" data-reveal>
+        <PlaceholderArt variant="field" seed={2} />
+        <figcaption class="border-t border-line px-4 py-2 font-mono text-xs text-ink-mute">
+          [Portrait photo]
+        </figcaption>
+      </figure>
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <div class="prose max-w-2xl">
+      <h2>Who I am</h2>
+      <p>
+        I work at the intersection of scientific research and interface design — building the
+        tools that let reef monitoring data, satellite imagery, and photogrammetric surveys be
+        explored rather than just published. My background is in [your field of study /
+        research background], and most of my work since has been figuring out how to make that
+        kind of data legible to people who weren't in the field or the lab when it was collected.
+      </p>
+
+      <h2>How I work</h2>
+      <p>
+        Every project on this site starts as a research question, not a design brief: what does a
+        habitat classification actually get wrong, and where? What does a digital twin need to be
+        useful to an ecologist rather than just impressive to look at? The interactive layer comes
+        second, and only when it answers a question a static figure couldn't. I care about
+        accuracy assessments as much as animation curves, and I try to hold both to the same
+        standard of honesty.
+      </p>
+
+      <h2>Beyond the lab</h2>
+      <p>
+        Outside of research, I shoot field photography during survey work — documented on the
+        <a href="/photography">photography page</a> — and spend time on generative, data-driven
+        art built from the same ocean and satellite datasets that inform the research itself. [A
+        line or two more about interests outside of work.]
+      </p>
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Skills" title="What I work with" />
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        skillGroups.map((group) => (
+          <div data-reveal>
+            <h3 class="mb-3 text-sm font-medium text-ink-mute uppercase tracking-wide">
+              {group.group}
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <Tag>{skill}</Tag>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <Button href="/cv" variant="solid">View full CV</Button>
+      <Button href="/contact" variant="outline">Get in touch</Button>
+    </div>
+  </Section>
+</BaseLayout>

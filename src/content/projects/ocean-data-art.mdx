@@ -1,0 +1,40 @@
+---
+title: 'Currents, rendered as drawing'
+hook: 'Satellite-derived current and temperature fields turned into a generative print and motion piece — data as material, not just measurement.'
+summary: 'A generative data-art series translating ocean current and sea-surface-temperature fields into flow-line drawings, treating an oceanographic dataset as an artistic material.'
+year: '[Year]'
+role: '[Role — e.g. artist & data engineer]'
+methods:
+  - vector field visualization
+  - generative flow-line rendering
+  - data-driven print design
+tools:
+  - Python
+  - NumPy / xarray
+  - Processing
+  - Adobe Illustrator
+tags:
+  - data art
+  - visualization
+  - generative design
+art: data
+seed: 6
+featured: false
+sample: true
+order: 5
+area: remote-sensing-gis
+---
+
+## The question
+
+Most of the visualization work in this practice is built to be read precisely: a legend, an axis, an accuracy statement. This project asked the opposite question — what happens if the same satellite ocean data is treated purely as material for drawing, with no legend at all, and judged only on whether it's beautiful and honest to the underlying physics?
+
+## Approach
+
+The source data is public satellite-derived current velocity and sea-surface-temperature fields. Rather than plotting them as a conventional vector or heatmap, the pipeline seeds thousands of massless particles across the field and advects each one forward through time using the actual velocity data, recording its path as a single continuous line. Density of lines, not color scales, does the work of showing where flow is fast, slow, or converging — the image is a drawing made entirely out of physically real trajectories, with color reserved for temperature.
+
+Every parameter that shapes the final image — particle density, line weight, trail length, palette — was chosen for how it reads visually, but every *line* is still a real, if simplified, integration of real current data. That constraint (aesthetic freedom in presentation, zero fabrication in the underlying paths) is what keeps the series feeling like data art rather than illustration.
+
+## Outcome
+
+The series has been shown as [context — e.g. a small print run / gallery showing / online release] and doubles as a teaching aid: the same particle-advection code, with a legend added back in, is used elsewhere in this practice to explain ocean circulation to non-specialist audiences.
