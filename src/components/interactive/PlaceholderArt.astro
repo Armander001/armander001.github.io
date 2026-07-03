@@ -1,0 +1,394 @@
+---
+/**
+ * PlaceholderArt.astro — generative inline-SVG placeholder art.
+ * Shared media system for ProjectCard, Lightbox, CompareSlider slots, and
+ * any page that needs abstract domain-flavored artwork (SPEC §5: inline
+ * SVG data-art, no external images).
+ *
+ * Props:
+ *   variant?: 'reef' | 'satellite' | 'twin' | 'field' | 'data' | 'story'
+ *     reef      — bathymetric contour rings + coral dots
+ *     satellite — pixel-grid classification-raster feel
+ *     twin      — wireframe terrain mesh lines
+ *     field     — duotone gradient with sun disc (field photography)
+ *     data      — scatter points + flow lines
+ *     story     — layered map sheets with route
+ *   seed?: number — varies the composition deterministically (build-time)
+ *   class?: string
+ *
+ * Decorative: rendered aria-hidden. Colors use the --t-* theme vars, so
+ * the art adapts to light/dark automatically. 16:10 viewBox, scales to
+ * its container (block, width 100%).
+ */
+export type ArtVariant = 'reef' | 'satellite' | 'twin' | 'field' | 'data' | 'story';
+
+interface Props {
+  variant?: ArtVariant;
+  seed?: number;
+  class?: string;
+}
+
+const { variant = 'reef', seed = 1, class: className } = Astro.props;
+
+const W = 800;
+const H = 500;
+
+/* Deterministic PRNG (mulberry32) — stable output per (variant, seed). */
+function mulberry32(a: number) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rnd = mulberry32((seed | 0) * 2654435761 + variant.charCodeAt(0) * 97 + variant.length);
+const rand = (min: number, max: number) => min + rnd() * (max - min);
+
+/* Unique id prefix for defs (several instances may share a page). */
+const uid = `pa${(rnd() * 1e8).toFixed(0)}`;
+
+/* ---- satellite: classification raster -------------------------------- */
+type Cell = { x: number; y: number; c: string; o: number };
+const cells: Cell[] = [];
+if (variant === 'satellite') {
+  const size = 40;
+  for (let y = 0; y < H; y += size) {
+    for (let x = 0; x < W; x += size) {
+      /* noise + low-frequency spatial term → loose class clusters */
+      const v =
+        rnd() * 0.65 +
+        0.35 * (0.5 + 0.5 * Math.sin(x / 95 + seed) * Math.cos(y / 75 - seed * 0.7));
+      if (v < 0.42) continue;
+      let c = 'var(--t-teal)';
+      let o = rand(0.1, 0.28);
+      if (v > 0.94) {
+        c = 'var(--t-coral)';
+        o = rand(0.35, 0.55);
+      } else if (v > 0.86) {
+        c = 'var(--t-sand)';
+        o = rand(0.2, 0.35);
+      } else if (v > 0.68) {
+        c = 'var(--t-cyan)';
+        o = rand(0.12, 0.3);
+      }
+      cells.push({ x: x + 2, y: y + 2, c, o });
+    }
+  }
+}
+
+/* ---- reef: contour rings + coral dots -------------------------------- */
+type Ring = { cx: number; cy: number; rx: number; ry: number; rot: number; o: number; c: string };
+type Dot = { x: number; y: number; r: number; o: number };
+const rings: Ring[] = [];
+const dots: Dot[] = [];
+if (variant === 'reef') {
+  const cx = rand(360, 480);
+  const cy = rand(210, 280);
+  let r = rand(26, 34);
+  for (let i = 0; i < 6; i++) {
+    rings.push({
+      cx: cx + rand(-10, 10),
+      cy: cy + rand(-8, 8),
+      rx: r * rand(1.08, 1.32),
+      ry: r * rand(0.72, 0.92),
+      rot: rand(-22, 22),
+      o: 0.52 - i * 0.065,
+      c: i % 2 === 0 ? 'var(--t-teal)' : 'var(--t-cyan)',
+    });
+    r *= 1.42;
+  }
+  /* small secondary shoal, upper-right */
+  let r2 = rand(14, 20);
+  const cx2 = rand(620, 700);
+  const cy2 = rand(90, 140);
+  for (let i = 0; i < 3; i++) {
+    rings.push({
+      cx: cx2,
+      cy: cy2,
+      rx: r2 * 1.2,
+      ry: r2 * 0.8,
+      rot: rand(-15, 15),
+      o: 0.32 - i * 0.08,
+      c: 'var(--t-teal)',
+    });
+    r2 *= 1.5;
+  }
+  for (let i = 0; i < 14; i++) {
+    const a = rand(0, Math.PI * 2);
+    const d = rand(24, 185);
+    dots.push({
+      x: cx + Math.cos(a) * d * 1.15,
+      y: cy + Math.sin(a) * d * 0.8,
+      r: rand(2.5, 5.5),
+      o: rand(0.45, 0.9),
+    });
+  }
+}
+
+/* ---- twin: wireframe terrain mesh ------------------------------------ */
+const meshRows: { d: string; o: number }[] = [];
+if (variant === 'twin') {
+  const bumps = Array.from({ length: 3 }, () => ({
+    cx: rand(140, 660),
+    amp: rand(38, 85),
+    w: rand(75, 150),
+  }));
+  const rows = 12;
+  for (let i = 0; i < rows; i++) {
+    const y0 = 128 + i * 30;
+    const rowFactor = Math.sin(((i + 1) / (rows + 1)) * Math.PI);
+    let d = '';
+    for (let x = 0; x <= W; x += 25) {
+      let elev = 0;
+      for (const b of bumps) elev += b.amp * Math.exp(-((x - b.cx) ** 2) / (2 * b.w * b.w));
+      const y = y0 - elev * rowFactor + Math.sin(x * 0.012 + i * 1.7) * 4;
+      d += (x === 0 ? 'M' : 'L') + x.toFixed(0) + ' ' + y.toFixed(1);
+    }
+    meshRows.push({ d, o: 0.12 + rowFactor * 0.38 });
+  }
+}
+
+/* ---- field: duotone + sun disc --------------------------------------- */
+const sun = { x: rand(520, 640), y: rand(115, 175), r: rand(42, 58) };
+const horizonY = 320;
+const glints: { x1: number; x2: number; y: number; o: number }[] = [];
+if (variant === 'field') {
+  for (let i = 0; i < 6; i++) {
+    const half = sun.r * (1.4 - i * 0.18) * rand(0.8, 1.1);
+    glints.push({
+      x1: sun.x - half,
+      x2: sun.x + half,
+      y: horizonY + 16 + i * 17 + rand(-3, 3),
+      o: 0.42 - i * 0.055,
+    });
+  }
+}
+
+/* ---- data: scatter + flow lines --------------------------------------- */
+const pts: (Dot & { c: string })[] = [];
+const flows: { d: string; c: string; o: number }[] = [];
+if (variant === 'data') {
+  for (let i = 0; i < 38; i++) {
+    pts.push({
+      x: rand(50, 750),
+      y: rand(70, 440),
+      r: rand(1.5, 3.5),
+      o: rand(0.35, 0.85),
+      c: rnd() > 0.72 ? 'var(--t-teal)' : 'var(--t-cyan)',
+    });
+  }
+  const flowColors = ['var(--t-coral)', 'var(--t-cyan)', 'var(--t-teal)'];
+  for (let i = 0; i < 3; i++) {
+    const y0 = rand(90, 410);
+    flows.push({
+      d: `M 30 ${y0.toFixed(0)} C 230 ${rand(70, 430).toFixed(0)}, 480 ${rand(
+        70,
+        430,
+      ).toFixed(0)}, 770 ${rand(90, 410).toFixed(0)}`,
+      c: flowColors[i] ?? 'var(--t-cyan)',
+      o: i === 0 ? 0.7 : 0.45,
+    });
+  }
+}
+
+/* ---- story: layered map sheets ---------------------------------------- */
+const sheets: { x: number; y: number; w: number; h: number; rot: number; o: number }[] = [];
+let route = '';
+let marker = { x: 0, y: 0 };
+if (variant === 'story') {
+  sheets.push(
+    { x: 175, y: 120, w: 400, h: 265, rot: rand(-8, -4), o: 0.35 },
+    { x: 205, y: 135, w: 400, h: 265, rot: rand(-3, -1), o: 0.6 },
+    { x: 235, y: 150, w: 400, h: 265, rot: rand(2, 4), o: 1 },
+  );
+  const s = sheets[2]!;
+  const rx = (f: number) => s.x + s.w * f;
+  const ry = (f: number) => s.y + s.h * f;
+  route = `M ${rx(0.12)} ${ry(0.78)} C ${rx(0.3)} ${ry(0.45)}, ${rx(0.52)} ${ry(0.72)}, ${rx(
+    0.68,
+  )} ${ry(0.4)} S ${rx(0.86)} ${ry(0.28)}, ${rx(0.88)} ${ry(0.22)}`;
+  marker = { x: rx(0.88), y: ry(0.22) };
+}
+---
+
+<svg
+  class:list={['block h-auto w-full', className]}
+  viewBox={`0 0 ${W} ${H}`}
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    {
+      variant === 'field' && (
+        <>
+          <linearGradient id={`${uid}-sky`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--t-teal)" stop-opacity="0.35" />
+            <stop offset="0.62" stop-color="var(--t-cyan)" stop-opacity="0.08" />
+            <stop offset="1" stop-color="var(--t-cyan)" stop-opacity="0.16" />
+          </linearGradient>
+        </>
+      )
+    }
+    <radialGradient id={`${uid}-glow`} cx="0.3" cy="0.2" r="1">
+      <stop offset="0" stop-color="var(--t-cyan)" stop-opacity="0.07"></stop>
+      <stop offset="1" stop-color="var(--t-cyan)" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+
+  <rect width={W} height={H} fill="var(--t-surface-2)"></rect>
+  <rect width={W} height={H} fill={`url(#${uid}-glow)`}></rect>
+
+  {/* satellite — classification raster */}
+  {
+    variant === 'satellite' && (
+      <g>
+        {cells.map((c) => (
+          <rect x={c.x} y={c.y} width="36" height="36" rx="3" fill={c.c} opacity={c.o} />
+        ))}
+        <g stroke="var(--t-line)" stroke-width="1" opacity="0.5">
+          <path d={`M 0 ${H / 2} H ${W}`} />
+          <path d={`M ${W / 2} 0 V ${H}`} />
+        </g>
+      </g>
+    )
+  }
+
+  {/* reef — contour rings + coral dots */}
+  {
+    variant === 'reef' && (
+      <g>
+        {rings.map((r) => (
+          <ellipse
+            cx={r.cx}
+            cy={r.cy}
+            rx={r.rx}
+            ry={r.ry}
+            transform={`rotate(${r.rot.toFixed(1)} ${r.cx} ${r.cy})`}
+            stroke={r.c}
+            stroke-width="1.25"
+            opacity={Math.max(r.o, 0.08)}
+          />
+        ))}
+        {dots.map((d) => (
+          <circle cx={d.x} cy={d.y} r={d.r} fill="var(--t-coral)" opacity={d.o} />
+        ))}
+      </g>
+    )
+  }
+
+  {/* twin — wireframe terrain */}
+  {
+    variant === 'twin' && (
+      <g>
+        <g stroke="var(--t-line)" stroke-width="1" opacity="0.55">
+          {[160, 320, 480, 640].map((x) => (
+            <path d={`M ${x} 60 V ${H - 40}`} />
+          ))}
+        </g>
+        {meshRows.map((r) => (
+          <path d={r.d} stroke="var(--t-cyan)" stroke-width="1.1" opacity={r.o} />
+        ))}
+      </g>
+    )
+  }
+
+  {/* field — duotone horizon + sun */}
+  {
+    variant === 'field' && (
+      <g>
+        <rect width={W} height={H} fill={`url(#${uid}-sky)`} />
+        <circle cx={sun.x} cy={sun.y} r={sun.r} fill="var(--t-sand)" opacity="0.85" />
+        <path
+          d={`M 0 ${horizonY} H ${W}`}
+          stroke="var(--t-sand)"
+          stroke-width="1.5"
+          opacity="0.45"
+        />
+        {glints.map((g) => (
+          <path
+            d={`M ${g.x1.toFixed(0)} ${g.y.toFixed(0)} H ${g.x2.toFixed(0)}`}
+            stroke="var(--t-sand)"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity={Math.max(g.o, 0.06)}
+          />
+        ))}
+      </g>
+    )
+  }
+
+  {/* data — scatter + flow lines */}
+  {
+    variant === 'data' && (
+      <g>
+        <g stroke="var(--t-line)" stroke-width="1" opacity="0.6">
+          {[125, 250, 375].map((y) => (
+            <path d={`M 30 ${y} H ${W - 30}`} />
+          ))}
+        </g>
+        {flows.map((f) => (
+          <path d={f.d} stroke={f.c} stroke-width="1.5" opacity={f.o} />
+        ))}
+        {pts.map((p) => (
+          <circle cx={p.x} cy={p.y} r={p.r} fill={p.c} opacity={p.o} />
+        ))}
+      </g>
+    )
+  }
+
+  {/* story — layered map sheets + route */}
+  {
+    variant === 'story' && (
+      <g>
+        {sheets.map((s, i) => (
+          <rect
+            x={s.x}
+            y={s.y}
+            width={s.w}
+            height={s.h}
+            rx="10"
+            transform={`rotate(${s.rot.toFixed(1)} ${s.x + s.w / 2} ${s.y + s.h / 2})`}
+            fill="var(--t-surface)"
+            stroke={i === 2 ? 'var(--t-cyan)' : 'var(--t-line)'}
+            stroke-width="1.25"
+            opacity={s.o}
+            stroke-opacity={i === 2 ? 0.5 : 1}
+          />
+        ))}
+        <g transform={`rotate(${sheets[2]!.rot.toFixed(1)} ${sheets[2]!.x + 200} ${sheets[2]!.y + 132.5})`}>
+          <path
+            d={`M ${sheets[2]!.x + 30} ${sheets[2]!.y + 60} c 60 -18 120 10 180 -6 s 120 -20 160 -2`}
+            stroke="var(--t-teal)"
+            stroke-width="1"
+            opacity="0.4"
+          />
+          <path
+            d={`M ${sheets[2]!.x + 30} ${sheets[2]!.y + 95} c 70 -14 130 14 190 0 s 110 -18 150 -4`}
+            stroke="var(--t-teal)"
+            stroke-width="1"
+            opacity="0.25"
+          />
+          <path
+            d={route}
+            stroke="var(--t-coral)"
+            stroke-width="1.75"
+            stroke-dasharray="6 5"
+            stroke-linecap="round"
+            opacity="0.8"
+          />
+          <circle cx={marker.x} cy={marker.y} r="5" fill="var(--t-coral)"></circle>
+          <circle
+            cx={marker.x}
+            cy={marker.y}
+            r="10"
+            stroke="var(--t-coral)"
+            stroke-width="1"
+            opacity="0.5"></circle>
+        </g>
+      </g>
+    )
+  }
+</svg>

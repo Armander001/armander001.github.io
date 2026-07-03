@@ -1,0 +1,131 @@
+---
+/**
+ * ProjectCard.astro — linked project teaser card (SPEC §5.4).
+ * The whole card is a single <a>: generative 16:10 media (PlaceholderArt),
+ * mono index + tags row, Fraunces title with underline sweep on hover/focus,
+ * one-line hook. Lift + accent border on hover/focus-within; all motion is
+ * disabled under prefers-reduced-motion (global rule + media query here).
+ *
+ * Props:
+ *   href: string
+ *   title: string
+ *   hook: string                    — one-line description
+ *   tags?: string[]
+ *   index?: string                  — mono ordinal, e.g. "01"
+ *   art?: ArtVariant                — 'reef'|'satellite'|'twin'|'field'|'data'|'story'
+ *   seed?: number                   — passed to PlaceholderArt
+ *   class?: string
+ */
+import Tag from '@/components/Tag.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import type { ArtVariant } from '@/components/interactive/PlaceholderArt.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  hook: string;
+  tags?: string[];
+  index?: string;
+  art?: ArtVariant;
+  seed?: number;
+  class?: string;
+}
+
+const { href, title, hook, tags = [], index, art = 'reef', seed = 1, class: className } = Astro.props;
+---
+
+<a {href} class:list={['project-card group', className]}>
+  <div class="pc-media" aria-hidden="true">
+    <PlaceholderArt variant={art} {seed} class="pc-art" />
+  </div>
+
+  <div class="p-5 md:p-6">
+    {
+      (index || tags.length > 0) && (
+        <p class="mb-3 flex flex-wrap items-center gap-2">
+          {index && (
+            <span class="font-mono text-xs tracking-[0.2em] text-cyan" aria-hidden="true">
+              {index}
+            </span>
+          )}
+          {tags.map((t) => (
+            <Tag>{t}</Tag>
+          ))}
+        </p>
+      )
+    }
+    <h3 class="pc-title"><span class="pc-title-sweep">{title}</span></h3>
+    <p class="mt-2 text-sm text-ink-mute">{hook}</p>
+  </div>
+</a>
+
+<style>
+  .project-card {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--t-line);
+    border-radius: 1rem;
+    background-color: var(--t-surface);
+    transition:
+      transform 250ms var(--ease-out-soft),
+      border-color 250ms var(--ease-out-soft),
+      box-shadow 250ms var(--ease-out-soft);
+  }
+
+  .project-card:hover,
+  .project-card:focus-visible {
+    transform: translateY(-4px);
+    border-color: var(--t-cyan);
+    box-shadow: 0 10px 32px rgb(0 0 0 / 0.25);
+  }
+
+  .project-card:focus-visible {
+    outline: 2px solid var(--t-cyan);
+    outline-offset: 3px;
+  }
+
+  .pc-media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-bottom: 1px solid var(--t-line);
+    background-color: var(--t-surface-2);
+  }
+
+  .pc-media :global(.pc-art) {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .pc-title {
+    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+    color: var(--t-ink);
+  }
+
+  /* underline sweep: background-size trick, left → right */
+  .pc-title-sweep {
+    background-image: linear-gradient(var(--t-cyan), var(--t-cyan));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    padding-bottom: 2px;
+    transition: background-size 250ms var(--ease-out-soft);
+  }
+
+  .project-card:hover .pc-title-sweep,
+  .project-card:focus-visible .pc-title-sweep {
+    background-size: 100% 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-card,
+    .pc-title-sweep {
+      transition: none;
+    }
+
+    .project-card:hover,
+    .project-card:focus-visible {
+      transform: none;
+    }
+  }
+</style>

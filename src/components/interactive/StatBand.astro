@@ -1,0 +1,119 @@
+---
+/**
+ * StatBand.astro — row of key numbers (SPEC §5.6).
+ * Grid 2 → 4 columns of big JetBrains Mono values with small muted labels.
+ * The final value is server-rendered (correct without JS); when JS runs and
+ * motion is allowed, the leading number animates 0 → final (~1.2s ease-out)
+ * on first reveal via a small local IntersectionObserver (threshold 0.4).
+ * Prefixes/suffixes ("+", "%", "k", "~") and decimal/comma formatting are
+ * preserved. Reduced motion or no-JS: static final value, no animation.
+ *
+ * Props:
+ *   stats: { value: string; label: string; note?: string }[]
+ *   class?: string
+ */
+interface Stat {
+  value: string;
+  label: string;
+  note?: string;
+}
+
+interface Props {
+  stats: Stat[];
+  class?: string;
+}
+
+const { stats, class: className } = Astro.props;
+
+/* Parse "1,204+" → prefix "", num "1,204", suffix "+" (done at build time
+   so the client script stays tiny and never mis-renders the fallback). */
+function parseValue(v: string): { prefix: string; num: string; suffix: string } | null {
+  const m = v.match(/^([^0-9]*)(\d[\d,]*(?:\.\d+)?)([\s\S]*)$/);
+  if (!m) return null;
+  return { prefix: m[1] ?? '', num: m[2] ?? '', suffix: m[3] ?? '' };
+}
+
+const colsClass = stats.length >= 4 ? 'md:grid-cols-4' : stats.length === 3 ? 'md:grid-cols-3' : '';
+---
+
+<div class:list={['grid grid-cols-2 gap-x-6 gap-y-10', colsClass, className]} data-statband>
+  {
+    stats.map((s) => {
+      const parsed = parseValue(s.value);
+      return (
+        <div>
+          <p class="font-mono text-3xl font-medium tracking-tight text-ink md:text-4xl">
+            {/* static value for screen readers / no-JS; animated twin is aria-hidden */}
+            <span class="sr-only">{s.value}</span>
+            <span
+              aria-hidden="true"
+              data-stat-value
+              data-prefix={parsed?.prefix}
+              data-num={parsed?.num}
+              data-suffix={parsed?.suffix}
+            >
+              {s.value}
+            </span>
+          </p>
+          <p class="mt-2 text-sm text-ink-mute">{s.label}</p>
+          {s.note && <p class="mt-1 font-mono text-xs text-ink-mute/70">{s.note}</p>}
+        </div>
+      );
+    })
+  }
+</div>
+
+<script>
+  function animateValue(el: HTMLElement): void {
+    const numStr = el.dataset.num;
+    if (!numStr) return; // unparseable value — leave the static text
+    const prefix = el.dataset.prefix ?? '';
+    const suffix = el.dataset.suffix ?? '';
+    const target = parseFloat(numStr.replace(/,/g, ''));
+    if (!isFinite(target)) return;
+    const decimals = numStr.includes('.') ? (numStr.split('.')[1]?.length ?? 0) : 0;
+    const commas = numStr.includes(',');
+
+    const format = (n: number): string => {
+      let out = n.toFixed(decimals);
+      if (commas) out = out.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return out;
+    };
+
+    const duration = 1200;
+    let startTs = 0;
+
+    function tick(ts: number): void {
+      if (startTs === 0) startTs = ts;
+      const t = Math.min((ts - startTs) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      el.textContent = prefix + format(target * eased) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = prefix + numStr + suffix; // exact final string
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function initStatBand(band: HTMLElement): void {
+    const values = Array.from(band.querySelectorAll<HTMLElement>('[data-stat-value]'));
+    if (values.length === 0) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return; // keep static final values
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          io.disconnect();
+          values.forEach(animateValue);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(band);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-statband]').forEach(initStatBand);
+</script>
