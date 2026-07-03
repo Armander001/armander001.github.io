@@ -1,0 +1,20 @@
+---
+/**
+ * Section.astro — semantic page section with site container and vertical
+ * rhythm. Usage: <Section id="work"> ... </Section>
+ */
+interface Props {
+  id?: string;
+  class?: string;
+  /** Extra classes for the inner container. */
+  containerClass?: string;
+}
+
+const { id, class: className, containerClass } = Astro.props;
+---
+
+<section {id} class:list={['section-pad', className]}>
+  <div class:list={['container-site', containerClass]}>
+    <slot />
+  </div>
+</section>

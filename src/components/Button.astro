@@ -1,0 +1,36 @@
+---
+/**
+ * Button.astro — renders an <a> when `href` is given, otherwise <button>.
+ * Variants: "solid" (coral CTA), "outline" (cyan), "ghost" (quiet).
+ * Usage: <Button href="/projects" variant="solid">View work</Button>
+ */
+interface Props {
+  href?: string;
+  variant?: 'solid' | 'outline' | 'ghost';
+  type?: 'button' | 'submit';
+  class?: string;
+}
+
+const { href, variant = 'solid', type = 'button', class: className } = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200';
+
+const variants: Record<string, string> = {
+  solid: 'bg-coral text-abyss hover:brightness-110 hover:-translate-y-px',
+  outline:
+    'border border-cyan/50 text-cyan hover:border-cyan hover:bg-cyan/10 hover:-translate-y-px',
+  ghost: 'text-ink-mute hover:text-cyan',
+};
+
+const classes = [base, variants[variant], className];
+const Element = href ? 'a' : 'button';
+---
+
+<Element
+  href={href}
+  type={href ? undefined : type}
+  class:list={classes}
+>
+  <slot />
+</Element>

@@ -1,0 +1,25 @@
+---
+/**
+ * TEMPORARY home page — proves layout/nav/footer/theme wiring.
+ * The real home page (hero, StatBand, featured projects, …) arrives in WP-C.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import { site } from '@/config/site';
+---
+
+<BaseLayout
+  title={`${site.name} — scientific visualization & remote sensing`}
+  description={site.tagline}
+  isHome
+>
+  <Section>
+    <p class="mb-4 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+      Scientific visualization · Remote sensing · Digital twins
+    </p>
+    <h1 class="max-w-3xl" data-reveal>{site.tagline}</h1>
+    <p class="mt-8 font-mono text-sm text-ink-mute" data-reveal>
+      Home page arrives in WP-C.
+    </p>
+  </Section>
+</BaseLayout>

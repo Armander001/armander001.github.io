@@ -1,0 +1,20 @@
+---
+/**
+ * Tag.astro — small mono pill for topics/tech labels.
+ * Usage: <Tag>remote sensing</Tag>
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    'inline-flex items-center rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[0.6875rem] tracking-wide text-ink-mute',
+    className,
+  ]}
+>
+  <slot />
+</span>

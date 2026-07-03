@@ -1,0 +1,24 @@
+---
+/**
+ * Card.astro — surface panel with hairline border and 1rem radius.
+ * Set `hover` for a subtle lift on hover (used for linked cards).
+ * Usage: <Card hover> ... </Card>
+ */
+interface Props {
+  hover?: boolean;
+  class?: string;
+}
+
+const { hover = false, class: className } = Astro.props;
+---
+
+<div
+  class:list={[
+    'rounded-2xl border border-line bg-surface p-6',
+    hover &&
+      'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-cyan/40 hover:shadow-[0_8px_30px_rgb(0_0_0/0.25)]',
+    className,
+  ]}
+>
+  <slot />
+</div>

@@ -1,0 +1,101 @@
+---
+/**
+ * BaseLayout.astro — the <html> shell for every page.
+ * Handles: fonts, global CSS, SEO head, pre-paint theme script, skip link,
+ * Nav, Footer, and the ONE shared IntersectionObserver that powers the
+ * [data-reveal] scroll-reveal contract (see global.css for the CSS side).
+ */
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/inter';
+import '@fontsource/jetbrains-mono';
+import '@/styles/global.css';
+
+import SEO from '@/components/SEO.astro';
+import Nav from '@/components/Nav.astro';
+import Footer from '@/components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  type?: 'website' | 'article';
+  /** Home page passes true to use the title without the "— name" suffix. */
+  isHome?: boolean;
+}
+
+const { title, description, ogImage, type, isHome } = Astro.props;
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <SEO {title} {description} {ogImage} {type} {isHome} />
+    <script is:inline>
+      /* Pre-paint: apply saved/system theme + mark JS available (reveal contract). */
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var t;
+        try {
+          t = localStorage.getItem('theme');
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        d.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-full focus:bg-cyan focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-abyss"
+    >
+      Skip to content
+    </a>
+
+    <Nav />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      /* Shared scroll-reveal observer — the only reveal logic on the site.
+         Elements opt in with `data-reveal`; CSS in global.css hides them
+         (only when html.js) until `.revealed` is added here. */
+      function initReveal() {
+        const els = document.querySelectorAll('[data-reveal]');
+        if (els.length === 0) return;
+
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('revealed'));
+          return;
+        }
+
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+        );
+
+        els.forEach((el) => io.observe(el));
+      }
+
+      initReveal();
+    </script>
+  </body>
+</html>

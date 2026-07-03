@@ -1,0 +1,28 @@
+---
+/**
+ * ContourDivider.astro — decorative bathymetric contour band (SPEC §3 motif).
+ * Purely decorative (aria-hidden). Strokes use currentColor, so set a text
+ * color on the wrapper to tint it, e.g.:
+ *   <div class="text-line"><ContourDivider /></div>
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<svg
+  class:list={['block h-16 w-full md:h-24', className]}
+  viewBox="0 0 1200 96"
+  preserveAspectRatio="none"
+  fill="none"
+  aria-hidden="true"
+>
+  <g stroke="currentColor" stroke-width="1" stroke-linecap="round">
+    <path opacity="0.55" d="M-10 70c90-26 180-34 280-18 96 15 190 12 282-14 90-25 186-28 280-6 94 21 194 20 378-24"></path>
+    <path opacity="0.4" d="M-10 82c100-20 200-26 306-12 100 13 198 10 294-13 92-22 184-24 274-5 92 20 190 20 346-16"></path>
+    <path opacity="0.28" d="M-10 56c80-30 170-42 264-30 102 13 204 8 300-20 88-26 180-30 272-10 98 21 202 22 384-30"></path>
+    <path opacity="0.16" d="M-10 42c70-24 160-36 258-28 106 9 212 2 306-24 84-24 172-30 262-14 100 18 208 22 394-32"></path>
+  </g>
+</svg>

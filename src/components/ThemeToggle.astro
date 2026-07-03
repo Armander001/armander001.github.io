@@ -1,0 +1,85 @@
+---
+/**
+ * ThemeToggle.astro — accessible dark/light switch.
+ * Swaps html[data-theme], persists to localStorage('theme'), keeps its
+ * aria-label in sync. The pre-paint script in BaseLayout sets the initial
+ * theme; this button only ever toggles it.
+ */
+---
+
+<button
+  type="button"
+  class="theme-toggle inline-flex size-9 items-center justify-center rounded-full border border-line text-ink-mute transition-colors duration-200 hover:border-cyan hover:text-cyan"
+  aria-label="Switch to light theme"
+  data-theme-toggle
+>
+  <!-- moon (shown in dark mode) -->
+  <svg
+    class="icon-moon size-4"
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+  </svg>
+  <!-- sun (shown in light mode) -->
+  <svg
+    class="icon-sun size-4"
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+  </svg>
+</button>
+
+<style>
+  /* Show the icon for the CURRENT theme; the label describes the switch target. */
+  .icon-sun {
+    display: none;
+  }
+  :global(html[data-theme='light']) .icon-moon {
+    display: none;
+  }
+  :global(html[data-theme='light']) .icon-sun {
+    display: block;
+  }
+</style>
+
+<script>
+  function initThemeToggles() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+    const syncLabels = () => {
+      const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+      const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      buttons.forEach((btn) => btn.setAttribute('aria-label', label));
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = next;
+        try {
+          localStorage.setItem('theme', next);
+        } catch {
+          /* storage unavailable (private mode) — theme still applies for this page */
+        }
+        syncLabels();
+      });
+    });
+
+    syncLabels();
+  }
+
+  initThemeToggles();
+</script>
