@@ -33,7 +33,9 @@ html[data-theme="light"] {
   --t-line: #e2dccd;
   --t-ink: #0b1b26;
   --t-ink-mute: #4e6577;
-  --t-cyan: #0e7c97;
+  /* Darkened from the initial #0e7c97 (4.39:1) to clear WCAG AA 4.5:1 for
+     normal-size text — this accent is used for text-xs kicker labels. */
+  --t-cyan: #0c7590;
   --t-teal: #0f8a6c;
   --t-coral: #d9482f;
   --t-sand: #8a6d3b;
