@@ -1,0 +1,46 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import { site } from '@/config/site';
+
+const title = 'Contact';
+const description = `Get in touch with ${site.name}.`;
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28 text-center">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>Contact</p>
+    <h1 class="mx-auto max-w-xl" data-reveal>Let's talk</h1>
+    <p class="mx-auto mt-4 max-w-md text-lg text-ink-mute" data-reveal>
+      I'm always glad to hear from collaborators, researchers, and anyone thinking about reef
+      monitoring, digital twins, or scientific data visualization — including talks, teaching, and
+      consulting.
+    </p>
+
+    <a
+      href={`mailto:${site.email}`}
+      class="mt-10 inline-block font-mono text-2xl text-cyan hover:underline md:text-3xl"
+      data-reveal
+    >
+      {site.email}
+    </a>
+
+    <div class="mx-auto mt-12 flex max-w-md flex-wrap justify-center gap-4" data-reveal>
+      {
+        site.social.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'font-mono text-sm',
+              link.placeholder ? 'text-ink-mute/50' : 'text-ink-mute hover:text-cyan',
+            ]}
+            title={link.placeholder ? 'Add link in src/config/site.ts' : undefined}
+          >
+            {link.label}
+            {link.placeholder && ' [soon]'}
+          </a>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>

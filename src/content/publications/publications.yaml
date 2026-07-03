@@ -1,0 +1,27 @@
+# Placeholder publication entries (SPEC §6). Every citation below is a
+# template — replace with your real bibliography. `real: false` suppresses
+# ScholarlyArticle JSON-LD until you flip it to true on a genuine entry.
+
+- id: pub-2024-reef-mapping
+  citation: '[Author list]. ([Year]). [Paper title on multi-temporal satellite habitat mapping]. [Journal name], [volume]([issue]), [pages].'
+  year: '[Year]'
+  venue: '[Journal name]'
+  tags: ['remote sensing', 'habitat mapping']
+  links: {}
+  real: false
+
+- id: pub-2023-photogrammetry
+  citation: '[Author list]. ([Year]). [Paper title on reef photogrammetry and change detection]. [Journal or conference name].'
+  year: '[Year]'
+  venue: '[Journal or conference name]'
+  tags: ['digital twins', 'photogrammetry']
+  links: {}
+  real: false
+
+- id: pub-2022-visualization
+  citation: '[Author list]. ([Year]). [Paper or thesis title on scientific visualization for reef monitoring]. [Publisher / institution].'
+  year: '[Year]'
+  venue: '[Publisher / institution]'
+  tags: ['scientific visualization']
+  links: {}
+  real: false

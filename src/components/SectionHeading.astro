@@ -1,0 +1,25 @@
+---
+/**
+ * SectionHeading.astro — mono kicker + Fraunces h2, optional dek line.
+ * Usage: <SectionHeading kicker="01 / Work" title="Selected projects"
+ *          dek="Optional one-line description." />
+ */
+interface Props {
+  kicker?: string;
+  title: string;
+  dek?: string;
+  class?: string;
+}
+
+const { kicker, title, dek, class: className } = Astro.props;
+---
+
+<header class:list={['mb-10 max-w-2xl md:mb-14', className]}>
+  {
+    kicker && (
+      <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase">{kicker}</p>
+    )
+  }
+  <h2 class="text-ink">{title}</h2>
+  {dek && <p class="mt-4 text-ink-mute">{dek}</p>}
+</header>

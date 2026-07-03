@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Card from '@/components/Card.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import { researchAreas } from '@/data/research';
+
+const title = 'Research';
+const description = 'Three research threads: coral reefs, digital twins, and remote sensing & GIS.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>Research</p>
+    <h1 class="max-w-2xl" data-reveal>Three threads, one question</h1>
+    <p class="mt-4 max-w-xl text-lg text-ink-mute" data-reveal>
+      Everything here is really one question asked at different scales: how do we see change in
+      shallow marine systems clearly enough, and communicate it honestly enough, to act on it in
+      time?
+    </p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Areas" title="Explore by area" />
+    <div class="grid gap-6 md:grid-cols-3">
+      {
+        researchAreas.map((area) => (
+          <Card hover class="flex h-full flex-col overflow-hidden !p-0" data-reveal>
+            <a href={`/research/${area.slug}`} class="flex h-full flex-col no-underline">
+              <PlaceholderArt variant={area.art} seed={area.seed} />
+              <div class="flex flex-1 flex-col p-6">
+                <h2 class="mb-3 text-xl">{area.title}</h2>
+                <p class="flex-1 text-sm text-ink-mute">{area.blurb}</p>
+                <span class="mt-4 font-mono text-xs tracking-wide text-cyan">Explore →</span>
+              </div>
+            </a>
+          </Card>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>

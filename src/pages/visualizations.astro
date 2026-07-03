@@ -1,0 +1,111 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Card from '@/components/Card.astro';
+import CompareSlider from '@/components/interactive/CompareSlider.astro';
+import StatBand from '@/components/interactive/StatBand.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import type { ArtVariant } from '@/components/interactive/PlaceholderArt.astro';
+
+const artVariants: ArtVariant[] = ['reef', 'satellite', 'twin', 'field', 'data', 'story'];
+
+const inDevelopment = [
+  {
+    title: 'Reef digital-twin scene',
+    body: 'A full Three.js viewer for browsing photogrammetric reef reconstructions directly in the browser, with epoch comparison.',
+  },
+  {
+    title: 'Scrollytelling story maps',
+    body: 'MapLibre-driven chaptered narratives, extending the pattern used on the coral story-map project.',
+  },
+  {
+    title: 'Photogrammetry viewer',
+    body: 'A lightweight model-viewer for sharing individual reef plot reconstructions without a full scene.',
+  },
+];
+
+const title = 'Visualizations';
+const description = 'Interactive demos of the components and visualization techniques used across this site.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+      Visualizations
+    </p>
+    <h1 class="max-w-2xl" data-reveal>Interaction as a scientific method</h1>
+    <p class="mt-4 max-w-xl text-lg text-ink-mute" data-reveal>
+      A comparison you can drag is a hypothesis you can check yourself. This page collects the
+      interactive techniques used throughout the site, on their own.
+    </p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading
+      kicker="Demo"
+      title="Before / after comparison"
+      dek="Drag the handle, or focus it and use arrow keys, Home/End, Page Up/Down."
+    />
+    <CompareSlider
+      beforeLabel="Sentinel-2 RGB"
+      afterLabel="Classified habitat map"
+      alt="Demo comparison of true-color imagery and a classified habitat map"
+      class="mx-auto max-w-3xl"
+    >
+      <PlaceholderArt slot="before" variant="field" seed={11} />
+      <PlaceholderArt slot="after" variant="satellite" seed={11} />
+    </CompareSlider>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading
+      kicker="Demo"
+      title="Count-up stat band"
+      dek="Demo metrics — final values render immediately without JavaScript; the count-up only plays when motion is enabled."
+    />
+    <StatBand
+      stats={[
+        { value: '12', label: 'Reef sites mapped', note: 'demo metric' },
+        { value: '4.8k', label: 'Images processed', note: 'demo metric' },
+        { value: '97.5%', label: 'Classification accuracy', note: 'demo metric' },
+        { value: '1,204+', label: 'Survey photos', note: 'demo metric' },
+      ]}
+    />
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading kicker="Generative art" title="Placeholder art variants" />
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        artVariants.map((v, i) => (
+          <figure class="overflow-hidden rounded-2xl border border-line bg-surface" data-reveal>
+            <PlaceholderArt variant={v} seed={i + 5} />
+            <figcaption class="border-t border-line px-4 py-2 font-mono text-xs text-ink-mute">
+              {v}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <SectionHeading
+      kicker="Roadmap"
+      title="In development"
+      dek="Honestly labeled — these are not built yet."
+    />
+    <div class="grid gap-6 md:grid-cols-3">
+      {
+        inDevelopment.map((item) => (
+          <Card data-reveal>
+            <p class="mb-2 font-mono text-xs tracking-wide text-coral uppercase">In development</p>
+            <h3 class="mb-2 text-lg">{item.title}</h3>
+            <p class="text-sm text-ink-mute">{item.body}</p>
+          </Card>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>

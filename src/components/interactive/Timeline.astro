@@ -1,0 +1,148 @@
+---
+/**
+ * Timeline.astro — vertical research/experience timeline (SPEC §5.3).
+ * Semantic <ol> with a left rail (hairline + node dots; the first/current
+ * item gets a cyan node with halo). Pure CSS/HTML — reveal comes from the
+ * shared [data-reveal] observer in BaseLayout.
+ *
+ * Props:
+ *   items: {
+ *     period: string;   // e.g. "2023 — now" (rendered in mono)
+ *     title: string;    // Fraunces heading
+ *     org?: string;     // institution / studio
+ *     summary: string;
+ *     tags?: string[];
+ *   }[]
+ *   class?: string
+ */
+import Tag from '@/components/Tag.astro';
+
+export interface TimelineItem {
+  period: string;
+  title: string;
+  org?: string;
+  summary: string;
+  tags?: string[];
+}
+
+interface Props {
+  items: TimelineItem[];
+  class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+
+<ol class:list={['timeline', className]}>
+  {
+    items.map((item, i) => (
+      <li class="tl-item" data-reveal>
+        <span class:list={['tl-node', i === 0 && 'tl-node-current']} aria-hidden="true" />
+        <p class="tl-period">{item.period}</p>
+        <div class="tl-body">
+          <h3 class="text-ink">{item.title}</h3>
+          {item.org && <p class="tl-org">{item.org}</p>}
+          <p class="mt-2 text-ink-mute">{item.summary}</p>
+          {item.tags && item.tags.length > 0 && (
+            <p class="mt-3 flex flex-wrap gap-1.5">
+              {item.tags.map((t) => (
+                <Tag>{t}</Tag>
+              ))}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* the rail */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.4375rem; /* centers under 1rem nodes */
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--t-cyan) 0,
+      var(--t-line) 6rem,
+      var(--t-line) calc(100% - 3rem),
+      transparent
+    );
+  }
+
+  .tl-item {
+    position: relative;
+    padding-inline-start: 2.25rem;
+  }
+
+  .tl-item + .tl-item {
+    margin-block-start: 3rem;
+  }
+
+  .tl-node {
+    position: absolute;
+    top: 0.4375rem;
+    left: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 1.5px solid var(--t-ink-mute);
+    background-color: var(--t-abyss);
+  }
+
+  .tl-node-current {
+    border-color: var(--t-cyan);
+    background-color: color-mix(in srgb, var(--t-cyan) 25%, var(--t-abyss));
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--t-cyan) 15%, transparent),
+      0 0 14px color-mix(in srgb, var(--t-cyan) 30%, transparent);
+  }
+
+  .tl-period {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--t-cyan);
+  }
+
+  .tl-body h3 {
+    margin-block-start: 0.375rem;
+    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  }
+
+  .tl-org {
+    margin-block-start: 0.125rem;
+    font-size: 0.875rem;
+    color: var(--t-sand);
+  }
+
+  /* Wider screens: period sits in its own left column beside the rail */
+  @media (min-width: 48rem) {
+    .tl-item {
+      display: grid;
+      grid-template-columns: 10rem 1fr;
+      gap: 1.5rem;
+      padding-inline-start: 3rem;
+    }
+
+    .timeline::before {
+      left: 0.4375rem;
+    }
+
+    .tl-period {
+      padding-block-start: 0.25rem;
+    }
+  }
+</style>

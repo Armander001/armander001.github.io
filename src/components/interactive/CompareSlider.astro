@@ -1,0 +1,245 @@
+---
+/**
+ * CompareSlider.astro — before/after comparison (SPEC §5.2).
+ * Custom element <compare-slider>. The BEFORE layer is the base (visible on
+ * the right); the AFTER layer sits on top, clipped from the right with
+ * clip-path: inset(0 X% 0 0), so dragging right reveals more "after".
+ * Chips: afterLabel top-left, beforeLabel top-right.
+ *
+ * Props:
+ *   before?: string  — image src for the before layer (or use slot="before")
+ *   after?: string   — image src for the after layer (or use slot="after")
+ *   beforeLabel?: string (default "Before")
+ *   afterLabel?: string  (default "After")
+ *   alt?: string     — describes the comparison (used for img alt + slider aria-label)
+ *   startPercent?: number (0–100, default 50) — initial divider position
+ *   class?: string
+ *
+ * Slots `before` / `after` accept arbitrary content (e.g. <PlaceholderArt/>).
+ *
+ * A11y: handle is role="slider", tabindex="0", aria-valuemin/max/now 0–100;
+ * Arrow keys ±2, PageUp/Down ±10, Home/End. Pointer drag with capture.
+ * No-JS: layers render statically clipped at startPercent (inline CSS var).
+ */
+interface Props {
+  before?: string;
+  after?: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  alt?: string;
+  startPercent?: number;
+  class?: string;
+}
+
+const {
+  before,
+  after,
+  beforeLabel = 'Before',
+  afterLabel = 'After',
+  alt = 'Before and after comparison',
+  startPercent = 50,
+  class: className,
+} = Astro.props;
+
+const start = Math.min(100, Math.max(0, startPercent));
+const hasBeforeSlot = Astro.slots.has('before');
+const hasAfterSlot = Astro.slots.has('after');
+---
+
+<compare-slider
+  class:list={[
+    'relative block touch-none overflow-hidden rounded-2xl border border-line bg-surface select-none',
+    className,
+  ]}
+  style={`--cs-pos: ${start}%;`}
+  data-start={start}
+>
+  <div class="cs-layer">
+    {hasBeforeSlot ? <slot name="before" /> : before && <img src={before} alt={alt ? `${alt} — ${beforeLabel}` : ''} draggable="false" />}
+  </div>
+
+  <div class="cs-layer cs-after">
+    {hasAfterSlot ? <slot name="after" /> : after && <img src={after} alt={alt ? `${alt} — ${afterLabel}` : ''} draggable="false" />}
+  </div>
+
+  <span class="cs-chip left-3" aria-hidden="true">{afterLabel}</span>
+  <span class="cs-chip right-3" aria-hidden="true">{beforeLabel}</span>
+
+  <div class="cs-divider" aria-hidden="true"></div>
+
+  <div
+    class="cs-handle"
+    role="slider"
+    tabindex="0"
+    aria-label={`${alt}: percent of “${afterLabel}” revealed`}
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow={start}
+    aria-valuetext={`${start}% ${afterLabel}`}
+  >
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M9 6 3 12l6 6M15 6l6 6-6 6"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </div>
+</compare-slider>
+
+<style>
+  .cs-layer {
+    display: block;
+    width: 100%;
+  }
+
+  .cs-layer :global(img),
+  .cs-layer :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .cs-after {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--cs-pos)) 0 0);
+  }
+
+  .cs-chip {
+    position: absolute;
+    top: 0.75rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--t-line);
+    border-radius: 9999px;
+    background-color: color-mix(in srgb, var(--t-abyss) 78%, transparent);
+    padding: 0.125rem 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.025em;
+    color: var(--t-ink);
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .cs-divider {
+    position: absolute;
+    inset-block: 0;
+    left: var(--cs-pos);
+    width: 2px;
+    transform: translateX(-1px);
+    background-color: color-mix(in srgb, var(--t-coral) 85%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--t-coral) 45%, transparent);
+    pointer-events: none;
+  }
+
+  .cs-handle {
+    position: absolute;
+    top: 50%;
+    left: var(--cs-pos);
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid var(--t-coral);
+    border-radius: 9999px;
+    background-color: color-mix(in srgb, var(--t-abyss) 82%, transparent);
+    color: var(--t-coral);
+    cursor: ew-resize;
+    backdrop-filter: blur(4px);
+    /* contour-ring styling: concentric halo */
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--t-coral) 14%, transparent),
+      0 0 0 9px color-mix(in srgb, var(--t-coral) 6%, transparent);
+  }
+
+  .cs-handle:focus-visible {
+    outline: 2px solid var(--t-cyan);
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  if (!customElements.get('compare-slider')) {
+    class CompareSlider extends HTMLElement {
+      #handle: HTMLElement | null = null;
+      #value = 50;
+
+      connectedCallback(): void {
+        this.#handle = this.querySelector<HTMLElement>('[role="slider"]');
+        this.#value = Number(this.dataset.start ?? '50');
+
+        this.addEventListener('pointerdown', this.#onPointerDown);
+        this.addEventListener('pointermove', this.#onPointerMove);
+        this.#handle?.addEventListener('keydown', this.#onKeyDown);
+      }
+
+      #onPointerDown = (e: PointerEvent): void => {
+        /* primary button / touch only */
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        this.setPointerCapture(e.pointerId);
+        this.#setFromClientX(e.clientX);
+      };
+
+      #onPointerMove = (e: PointerEvent): void => {
+        if (!this.hasPointerCapture(e.pointerId)) return;
+        this.#setFromClientX(e.clientX);
+      };
+
+      #onKeyDown = (e: KeyboardEvent): void => {
+        let next: number | null = null;
+        switch (e.key) {
+          case 'ArrowLeft':
+          case 'ArrowDown':
+            next = this.#value - 2;
+            break;
+          case 'ArrowRight':
+          case 'ArrowUp':
+            next = this.#value + 2;
+            break;
+          case 'PageDown':
+            next = this.#value - 10;
+            break;
+          case 'PageUp':
+            next = this.#value + 10;
+            break;
+          case 'Home':
+            next = 0;
+            break;
+          case 'End':
+            next = 100;
+            break;
+        }
+        if (next !== null) {
+          e.preventDefault();
+          this.#setValue(next);
+        }
+      };
+
+      #setFromClientX(clientX: number): void {
+        const rect = this.getBoundingClientRect();
+        if (rect.width === 0) return;
+        this.#setValue(((clientX - rect.left) / rect.width) * 100);
+      }
+
+      #setValue(v: number): void {
+        this.#value = Math.min(100, Math.max(0, Math.round(v)));
+        this.style.setProperty('--cs-pos', `${this.#value}%`);
+        if (this.#handle) {
+          this.#handle.setAttribute('aria-valuenow', String(this.#value));
+          const after = this.#handle.getAttribute('aria-valuetext');
+          /* keep the "% <label>" suffix from the server-rendered valuetext */
+          const suffix = after ? after.replace(/^\d+%/, '').trim() : '';
+          this.#handle.setAttribute('aria-valuetext', `${this.#value}% ${suffix}`.trim());
+        }
+      }
+    }
+
+    customElements.define('compare-slider', CompareSlider);
+  }
+</script>

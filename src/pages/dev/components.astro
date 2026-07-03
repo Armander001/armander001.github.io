@@ -1,0 +1,183 @@
+---
+/**
+ * /dev/components — TEMPORARY internal proving ground for the WP-B
+ * interactive component library. Not linked from navigation and excluded
+ * from the sitemap (see astro.config.mjs filter). NOTE: BaseLayout has no
+ * head slot / noindex prop, so a <meta name="robots" content="noindex">
+ * could not be added without modifying BaseLayout (off-limits for WP-B) —
+ * flagged for the architect; sitemap exclusion covers the practical case.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import Button from '@/components/Button.astro';
+import ContourDivider from '@/components/ContourDivider.astro';
+import OceanField from '@/components/interactive/OceanField.astro';
+import CompareSlider from '@/components/interactive/CompareSlider.astro';
+import Timeline from '@/components/interactive/Timeline.astro';
+import type { TimelineItem } from '@/components/interactive/Timeline.astro';
+import ProjectCard from '@/components/interactive/ProjectCard.astro';
+import Lightbox from '@/components/interactive/Lightbox.astro';
+import type { LightboxItem } from '@/components/interactive/Lightbox.astro';
+import StatBand from '@/components/interactive/StatBand.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+import type { ArtVariant } from '@/components/interactive/PlaceholderArt.astro';
+
+const timelineItems: TimelineItem[] = [
+  {
+    period: '2024 — now',
+    title: 'Reef digital-twin research',
+    org: '[PLACEHOLDER: institution]',
+    summary:
+      'Building interactive 3D representations of shallow reef systems from photogrammetry and multispectral imagery.',
+    tags: ['digital twins', 'photogrammetry'],
+  },
+  {
+    period: '2022 — 2024',
+    title: 'Satellite habitat classification',
+    org: '[PLACEHOLDER: lab / employer]',
+    summary:
+      'Supervised classification pipelines for benthic habitat mapping across multi-year Sentinel-2 archives.',
+    tags: ['remote sensing', 'GIS'],
+  },
+  {
+    period: '2020 — 2022',
+    title: 'Scientific visualization practice',
+    summary:
+      'Designed data-driven visual explainers translating field measurements into public-facing interactives.',
+    tags: ['dataviz', 'design'],
+  },
+];
+
+const artVariants: ArtVariant[] = ['reef', 'satellite', 'twin', 'field', 'data', 'story'];
+
+const projectCards = artVariants.map((art, i) => ({
+  href: '#',
+  index: String(i + 1).padStart(2, '0'),
+  title: `Sample ${art} project`,
+  hook: 'One-line hook describing what this project explores and why it matters.',
+  tags: [art, 'sample'],
+  art,
+  seed: i + 2,
+}));
+
+const galleryItems: LightboxItem[] = [
+  { id: 'g1', title: 'Reef shelf, contour study', caption: 'Placeholder art — swap for a field photo.', alt: 'Abstract contour-ring artwork', art: 'reef' },
+  { id: 'g2', title: 'Classified raster tile', caption: 'Sentinel-2 style classification mosaic.', alt: 'Abstract classification raster artwork', art: 'satellite' },
+  { id: 'g3', title: 'Terrain wireframe', alt: 'Abstract wireframe mesh artwork', art: 'twin' },
+  { id: 'g4', title: 'Low sun over the flats', caption: 'Golden-hour placeholder.', alt: 'Abstract duotone horizon artwork', art: 'field' },
+  { id: 'g5', title: 'Drift trajectories', alt: 'Abstract scatter and flow-line artwork', art: 'data' },
+  { id: 'g6', title: 'Story-map sheets', caption: 'Layered map sheets with a dashed route.', alt: 'Abstract layered map artwork', art: 'story' },
+  { id: 'g7', title: 'Shoal margin, second pass', alt: 'Abstract contour-ring artwork', art: 'reef' },
+  { id: 'g8', title: 'Band-ratio experiment', alt: 'Abstract classification raster artwork', art: 'satellite' },
+];
+---
+
+<BaseLayout
+  title="Component library (dev)"
+  description="Internal proving ground for the WP-B interactive components. Not for publication."
+>
+  <!-- OceanField behind a hero-style block -->
+  <div class="relative overflow-hidden border-b border-line">
+    <OceanField />
+    <Section class="relative">
+      <p class="mb-4 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+        WP-B · Interactive component library
+      </p>
+      <h1 class="max-w-3xl" data-reveal>Component proving ground</h1>
+      <p class="mt-6 max-w-xl text-ink-mute" data-reveal>
+        Every WP-B component with sample props. This page is temporary scaffolding for review —
+        it is excluded from the sitemap and never linked from navigation.
+      </p>
+      <div class="mt-8 flex gap-3" data-reveal>
+        <Button href="#compare">Jump to CompareSlider</Button>
+        <Button href="#gallery" variant="outline">Jump to Lightbox</Button>
+      </div>
+    </Section>
+  </div>
+
+  <Section id="stats">
+    <SectionHeading
+      kicker="01 / StatBand"
+      title="Numbers that count up"
+      dek="Final values are server-rendered; the count-up only runs when JS + motion are available."
+    />
+    <StatBand
+      stats={[
+        { value: '12', label: 'Reef sites mapped', note: '[PLACEHOLDER]' },
+        { value: '4.8k', label: 'Images processed' },
+        { value: '97.5%', label: 'Classification accuracy', note: 'sample metric' },
+        { value: '1,204+', label: 'Survey photos' },
+      ]}
+    />
+  </Section>
+
+  <div class="text-line"><ContourDivider /></div>
+
+  <Section id="compare">
+    <SectionHeading
+      kicker="02 / CompareSlider"
+      title="Before / after comparison"
+      dek="Drag the handle, or focus it and use arrow keys, Home/End, PageUp/Down."
+    />
+    <CompareSlider
+      beforeLabel="2016 RGB"
+      afterLabel="2024 Classified"
+      alt="Reef habitat, true-color 2016 versus classified 2024"
+      startPercent={50}
+      class="mx-auto max-w-3xl"
+    >
+      <PlaceholderArt slot="before" variant="field" seed={11} />
+      <PlaceholderArt slot="after" variant="satellite" seed={11} />
+    </CompareSlider>
+  </Section>
+
+  <Section id="timeline" class="border-t border-line">
+    <SectionHeading
+      kicker="03 / Timeline"
+      title="Research timeline"
+      dek="Semantic ordered list; the first node reads as “current”. Entries reveal on scroll."
+    />
+    <Timeline items={timelineItems} class="max-w-3xl" />
+  </Section>
+
+  <Section id="cards" class="border-t border-line">
+    <SectionHeading
+      kicker="04 / ProjectCard"
+      title="Project cards — all six art variants"
+      dek="Whole card is one link. Hover or keyboard-focus for the lift + underline sweep."
+    />
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {projectCards.map((p) => <ProjectCard {...p} />)}
+    </div>
+  </Section>
+
+  <Section id="gallery" class="border-t border-line">
+    <SectionHeading
+      kicker="05 / Lightbox"
+      title="Gallery with dialog viewer"
+      dek="Click a tile: native <dialog>, arrow keys navigate, Esc or backdrop click closes, focus returns to the tile."
+    />
+    <Lightbox items={galleryItems} columns={3} />
+  </Section>
+
+  <Section id="art" class="border-t border-line">
+    <SectionHeading
+      kicker="06 / PlaceholderArt"
+      title="Generative art variants"
+      dek="Shared by ProjectCard, Lightbox and CompareSlider slots. Same variant + seed is deterministic."
+    />
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        artVariants.map((v, i) => (
+          <figure class="overflow-hidden rounded-2xl border border-line bg-surface">
+            <PlaceholderArt variant={v} seed={i + 5} />
+            <figcaption class="border-t border-line px-4 py-2 font-mono text-xs text-ink-mute">
+              variant="{v}"
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>

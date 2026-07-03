@@ -1,0 +1,38 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import Button from '@/components/Button.astro';
+
+const focusItems = [
+  'Extending the reef digital-twin pipeline to handle multi-site epoch comparison automatically.',
+  '[Current research focus — e.g. validating a new benthic classification approach against field data]',
+  '[Current writing or speaking commitment]',
+  'Slowly migrating field photography from the past two seasons onto this site.',
+];
+
+const title = 'Now';
+const description = 'What I am focused on right now.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>Now</p>
+    <h1 class="max-w-2xl" data-reveal>What I'm focused on</h1>
+    <p class="mt-4 font-mono text-sm text-ink-mute" data-reveal>Updated [Month Year]</p>
+  </Section>
+
+  <Section class="border-t border-line">
+    <ul class="max-w-2xl space-y-4">
+      {
+        focusItems.map((item) => (
+          <li class="border-l-2 border-line pl-5 text-ink-mute" data-reveal>
+            {item}
+          </li>
+        ))
+      }
+    </ul>
+    <div class="mt-10">
+      <Button href="/research" variant="ghost">See the research areas behind this →</Button>
+    </div>
+  </Section>
+</BaseLayout>

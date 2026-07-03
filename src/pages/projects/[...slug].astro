@@ -1,0 +1,101 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import Tag from '@/components/Tag.astro';
+import Button from '@/components/Button.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      prev: projects[i - 1] ?? null,
+      next: projects[i + 1] ?? null,
+    },
+  }));
+}
+
+const { project, prev, next } = Astro.props;
+const { Content } = await render(project);
+const { data } = project;
+
+const title = data.title;
+const description = data.summary;
+---
+
+<BaseLayout {title} {description} type="article">
+  <Section containerClass="max-w-5xl" class="pt-24 md:pt-28">
+    <nav class="mb-8 font-mono text-xs text-ink-mute" aria-label="Breadcrumb">
+      <a href="/projects" class="hover:text-cyan">Work</a>
+      <span aria-hidden="true"> / </span>
+      <span class="text-ink">{data.title}</span>
+    </nav>
+
+    <div class="grid gap-12 md:grid-cols-[minmax(0,1fr)_16rem]">
+      <div>
+        <h1 class="max-w-2xl">{data.title}</h1>
+        <p class="mt-4 max-w-xl text-lg text-ink-mute">{data.hook}</p>
+
+        {
+          data.sample && (
+            <div class="mt-8 rounded-xl border border-coral/30 bg-coral/5 px-5 py-4 text-sm text-ink-mute">
+              <strong class="text-coral">Sample project</strong> — this is template content
+              demonstrating the format. Replace with your own work.
+            </div>
+          )
+        }
+
+        <div class="prose mt-10">
+          <Content />
+        </div>
+
+        <nav class="mt-16 flex items-center justify-between gap-4 border-t border-line pt-8">
+          {
+            prev ? (
+              <a href={`/projects/${prev.id}`} class="text-sm text-ink-mute hover:text-cyan">
+                ← {prev.data.title}
+              </a>
+            ) : <span />
+          }
+          {
+            next && (
+              <a href={`/projects/${next.id}`} class="text-right text-sm text-ink-mute hover:text-cyan">
+                {next.data.title} →
+              </a>
+            )
+          }
+        </nav>
+      </div>
+
+      <aside class="h-fit rounded-2xl border border-line bg-surface p-6 text-sm md:sticky md:top-24">
+        <dl class="space-y-4">
+          <div>
+            <dt class="font-mono text-xs tracking-wide text-ink-mute uppercase">Year</dt>
+            <dd class="mt-1">{data.year}</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-xs tracking-wide text-ink-mute uppercase">Role</dt>
+            <dd class="mt-1">{data.role}</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-xs tracking-wide text-ink-mute uppercase">Methods</dt>
+            <dd class="mt-1 text-ink-mute">{data.methods.join(', ')}</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-xs tracking-wide text-ink-mute uppercase">Tools</dt>
+            <dd class="mt-2 flex flex-wrap gap-1.5">
+              {data.tools.map((tool: string) => <Tag>{tool}</Tag>)}
+            </dd>
+          </div>
+        </dl>
+        <div class="mt-6 border-t border-line pt-6">
+          <Button href={`/research/${data.area}`} variant="ghost" class="!px-0">
+            More on {data.area.replace('-', ' ')} →
+          </Button>
+        </div>
+      </aside>
+    </div>
+  </Section>
+</BaseLayout>

@@ -1,0 +1,60 @@
+---
+title: 'Mapping a reef shelf from orbit'
+hook: 'Multi-year Sentinel-2 archives classified into benthic habitat maps with honest error estimates.'
+summary: 'A supervised classification workflow for shallow-water habitat mapping — correction, classification, and accuracy assessment across a multi-year open satellite archive.'
+year: '[Year]'
+role: '[Role — e.g. remote sensing analyst]'
+methods:
+  - atmospheric & sun-glint correction
+  - supervised classification (random forest)
+  - multi-temporal compositing
+  - accuracy assessment
+tools:
+  - Google Earth Engine
+  - Python
+  - scikit-learn
+  - QGIS
+  - GDAL
+tags:
+  - remote sensing
+  - habitat mapping
+  - Sentinel-2
+art: satellite
+seed: 7
+featured: true
+sample: true
+order: 2
+area: remote-sensing-gis
+---
+
+import CompareSlider from '@/components/interactive/CompareSlider.astro';
+import PlaceholderArt from '@/components/interactive/PlaceholderArt.astro';
+
+## The question
+
+A field team can survey a few kilometers of reef in a season. A Sentinel-2 tile covers 100 km on a side and arrives every five days, free. The question is whether that open archive can be turned into habitat maps trustworthy enough to base decisions on — and how to make the map's uncertainty as visible as its colors.
+
+## Approach
+
+Shallow water punishes shortcuts. Before any classification, each scene passes through a correction chain: cloud and cloud-shadow masking, atmospheric correction, then sun-glint removal using the near-infrared signal over optically deep water. Rather than classifying single scenes, the workflow builds multi-temporal composites — a per-pixel median across the clearest scenes of a season — which suppresses residual glint, waves, and turbidity events that no single-scene method fully removes.
+
+Training data comes from georeferenced field surveys at [Site name] : photo-quadrat points labeled by benthic class (coral, algae, seagrass, rubble, sand) and split site-wise, not randomly, so validation actually tests generalization to unseen reef rather than memorization of neighboring pixels. A random forest does the classification; nothing fancier survived contact with the accuracy assessment.
+
+The step most maps skip is the one this project treats as the product: a full error matrix from a stratified, independently sampled validation set, reported per class. Users see not just "seagrass here" but how often "seagrass" is right — and where the map is guessing.
+
+<CompareSlider
+  beforeLabel="Sentinel-2 RGB composite"
+  afterLabel="Classified habitat map"
+  alt="True-color Sentinel-2 composite compared with the classified benthic habitat map for the same reef shelf"
+>
+  <PlaceholderArt slot="before" variant="field" seed={7} />
+  <PlaceholderArt slot="after" variant="satellite" seed={7} />
+</CompareSlider>
+
+<figcaption class="mt-2 text-center font-mono text-xs text-ink-mute">
+  Illustrative placeholder — replace with a real before/after tile pair from the classification run.
+</figcaption>
+
+## Outcome
+
+The workflow now covers [N] km of reef shelf at 10 m resolution, refreshed as new clear-sky Sentinel-2 scenes arrive, with a published per-class accuracy figure attached to every map release rather than a bare classification image. That error matrix has become the thing collaborators ask for first — a map people can calibrate their trust in is more useful than a marginally prettier one they can't.

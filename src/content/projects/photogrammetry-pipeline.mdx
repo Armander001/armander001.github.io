@@ -1,0 +1,41 @@
+---
+title: 'From dive footage to measurable model'
+hook: 'A field-to-model photogrammetry pipeline built so any trained diver can produce a survey-grade 3D reconstruction, not just a specialist.'
+summary: 'A structure-from-motion pipeline and field protocol that turns underwater survey photography into consistent, scale-accurate 3D reef reconstructions.'
+year: '[Year]'
+role: '[Role — e.g. pipeline developer & field lead]'
+methods:
+  - structure-from-motion photogrammetry
+  - underwater survey protocol design
+  - ground control & scale referencing
+  - batch reconstruction automation
+tools:
+  - Agisoft Metashape
+  - Python
+  - CloudCompare
+  - Bash / cron automation
+tags:
+  - photogrammetry
+  - field methods
+  - pipeline
+art: twin
+seed: 12
+featured: false
+sample: true
+order: 4
+area: digital-twins
+---
+
+## The question
+
+The reef digital-twin work depends on one unglamorous thing going right every time: the underwater photography. A brilliant reconstruction pipeline is useless if every survey diver shoots slightly differently, at inconsistent depth, with inconsistent overlap. The question behind this project wasn't algorithmic — it was: how do you make a 3D-reconstruction-grade survey repeatable across different divers, sites, and dive computers?
+
+## Approach
+
+The answer turned out to be mostly protocol, not software. A written and video-illustrated field guide standardizes swim pattern, altitude above substrate, image overlap targets, and lighting, so a new diver can be trained on land before ever shooting a plot that matters. Physical scale bars and coded targets placed at fixed plot corners give every reconstruction the same ground-truth reference frame, which is what makes epoch-to-epoch comparison possible later.
+
+On the software side, the pipeline is intentionally unglamorous too: a batch script watches an incoming-photos folder, groups images by dive and plot ID from filename conventions, and kicks off alignment and dense reconstruction in Metashape without anyone needing to touch the GUI for a routine survey. The one piece of real engineering is a pre-flight QA step — a Python script that flags likely problem dives (too few images, poor overlap estimated from EXIF/GPS-adjacent metadata, suspicious gaps in the sequence) *before* a multi-hour reconstruction is wasted on unusable footage.
+
+## Outcome
+
+The pipeline has processed [N] survey plots to a consistent reconstruction quality bar without a specialist present for the capture step. The real deliverable isn't the code — it's that photogrammetry stopped being a bottleneck that only one person on the team could execute.

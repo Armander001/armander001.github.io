@@ -1,0 +1,41 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import { getCollection } from 'astro:content';
+
+const notes = (await getCollection('notes')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const title = 'Notes';
+const description = 'Essays and notes on scientific visualization, data storytelling, and building this site.';
+---
+
+<BaseLayout {title} {description}>
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>Notes</p>
+    <h1 class="max-w-2xl" data-reveal>Notes</h1>
+  </Section>
+
+  <Section class="border-t border-line">
+    <ul class="max-w-2xl divide-y divide-line">
+      {
+        notes.map((note) => (
+          <li class="py-6 first:pt-0" data-reveal>
+            <a href={`/notes/${note.id}`} class="group block no-underline">
+              <p class="mb-2 font-mono text-xs text-ink-mute">
+                {note.data.date.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+              <h2 class="text-xl group-hover:text-cyan">{note.data.title}</h2>
+              <p class="mt-2 text-ink-mute">{note.data.dek}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+</BaseLayout>

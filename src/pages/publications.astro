@@ -1,0 +1,83 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Section from '@/components/Section.astro';
+import Tag from '@/components/Tag.astro';
+import { getCollection } from 'astro:content';
+
+const publications = await getCollection('publications');
+const byYear = new Map<string, typeof publications>();
+for (const pub of publications) {
+  const list = byYear.get(pub.data.year) ?? [];
+  list.push(pub);
+  byYear.set(pub.data.year, list);
+}
+const years = [...byYear.keys()].sort((a, b) => b.localeCompare(a));
+
+const realEntries = publications.filter((p) => p.data.real);
+const jsonLd = realEntries.map((p) => ({
+  '@context': 'https://schema.org',
+  '@type': 'ScholarlyArticle',
+  name: p.data.citation,
+  datePublished: p.data.year,
+}));
+
+const title = 'Publications';
+const description = 'Publications and preprints.';
+---
+
+<BaseLayout {title} {description}>
+  {jsonLd.map((entry) => <script type="application/ld+json" is:inline set:html={JSON.stringify(entry)} />)}
+
+  <Section class="pt-24 md:pt-28">
+    <p class="mb-3 font-mono text-xs tracking-[0.2em] text-cyan uppercase" data-reveal>
+      Publications
+    </p>
+    <h1 class="max-w-2xl" data-reveal>Publications</h1>
+
+    <div class="mt-8 max-w-2xl rounded-xl border border-coral/30 bg-coral/5 px-5 py-4 text-sm text-ink-mute" data-reveal>
+      <strong class="text-coral">Placeholder entries</strong> — the citations below are templates.
+      Replace with your real bibliography and set <code>real: true</code> on entries that should
+      emit structured publication metadata.
+    </div>
+  </Section>
+
+  <Section class="border-t border-line">
+    <div class="max-w-3xl space-y-12">
+      {
+        years.map((year) => (
+          <div data-reveal>
+            <h2 class="mb-6 font-mono text-lg text-ink-mute">{year}</h2>
+            <ul class="space-y-6">
+              {byYear.get(year)!.map((pub) => (
+                <li class="border-l-2 border-line pl-5">
+                  <p class="text-ink">{pub.data.citation}</p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <Tag>{pub.data.venue}</Tag>
+                    {pub.data.tags.map((t: string) => (
+                      <Tag>{t}</Tag>
+                    ))}
+                    {pub.data.links.pdf && (
+                      <a href={pub.data.links.pdf} class="text-xs text-cyan hover:underline">
+                        PDF
+                      </a>
+                    )}
+                    {pub.data.links.doi && (
+                      <a href={pub.data.links.doi} class="text-xs text-cyan hover:underline">
+                        DOI
+                      </a>
+                    )}
+                    {pub.data.links.code && (
+                      <a href={pub.data.links.code} class="text-xs text-cyan hover:underline">
+                        Code
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+</BaseLayout>

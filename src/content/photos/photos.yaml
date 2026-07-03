@@ -1,0 +1,73 @@
+# Field-photography placeholder entries (SPEC §6) for /photography's Lightbox.
+# Replace `art`/`seed` generative placeholders with real `src` images —
+# add `src: /images/photos/whatever.jpg` per entry once photos are ready.
+
+- id: photo-01
+  title: 'Setting the transect'
+  caption: 'First light over the reef flat, [Location] — laying tape before the survey team drops in.'
+  alt: 'Placeholder field-photography artwork, warm duotone horizon'
+  art: field
+  seed: 21
+
+- id: photo-02
+  title: 'Fore-reef slope'
+  caption: 'Coral cover along the fore-reef slope, [Location].'
+  alt: 'Placeholder reef contour artwork'
+  art: reef
+  seed: 3
+
+- id: photo-03
+  title: 'Scale bars in place'
+  caption: 'Ground-control targets anchoring a photogrammetry plot, [Location].'
+  alt: 'Placeholder wireframe mesh artwork'
+  art: twin
+  seed: 8
+
+- id: photo-04
+  title: 'Post-dive notes'
+  caption: 'Logging observations topside after a survey dive, [Location].'
+  alt: 'Placeholder duotone horizon artwork'
+  art: field
+  seed: 33
+
+- id: photo-05
+  title: 'Shelf from above'
+  caption: 'A drone pass over the reef shelf ahead of a survey season, [Location].'
+  alt: 'Placeholder classification raster artwork'
+  art: satellite
+  seed: 14
+
+- id: photo-06
+  title: 'Quadrat, close'
+  caption: 'A single photo-quadrat frame, benthic cover ready for classification, [Location].'
+  alt: 'Placeholder scatter and flow-line artwork'
+  art: data
+  seed: 19
+
+- id: photo-07
+  title: 'Boat run out'
+  caption: 'Heading out before dawn to beat the wind, [Location].'
+  alt: 'Placeholder duotone horizon artwork'
+  art: field
+  seed: 27
+
+- id: photo-08
+  title: 'Bleaching event'
+  caption: 'A partial bleaching event documented during routine monitoring, [Location], [Year].'
+  alt: 'Placeholder reef contour artwork'
+  art: reef
+  seed: 41
+
+- id: photo-09
+  title: 'Story-map field check'
+  caption: 'Ground-truthing a mapped transect against the real reef, [Location].'
+  alt: 'Placeholder layered map artwork'
+  art: story
+  seed: 6
+
+- id: photo-10
+  title: 'End of season'
+  caption: 'Gear packed, last dive of the season, [Location], [Year].'
+  alt: 'Placeholder duotone horizon artwork'
+  art: field
+  seed: 45
